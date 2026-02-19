@@ -7,10 +7,8 @@ import models.IProductModel;
 import models.ICategoryModel;
 import models.settings.ISettingsModel;
 import models.settings.SettingsModel;
-import org.javatuples.Pair;
 
 import java.awt.event.ItemEvent;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,32 +24,32 @@ public class ProductCreatePresenter extends ProductPresenter {
     private final ICategoryModel categoryModel;
     private final ISettingsModel settingsModel;
     private IModularCategoryView modularView;
-    private boolean alreadyInsertedCategories;
-    private static Category categoryUtil = new Category("");
+    private static final Category categoryUtil = new Category("");
 
     public ProductCreatePresenter(IProductCreateView productCreateView, IProductModel productModel, ICategoryModel categoryModel, ISettingsModel settingsModel) {
         super((SettingsModel) settingsModel);
         this.productCreateView = productCreateView;
         this.settingsModel = settingsModel;
-        view = productCreateView;
         this.productModel = productModel;
-
         this.categoryModel = categoryModel;
-        alreadyInsertedCategories = categoryModel.categoriesAlreadyInserted();
-        ArrayList<String> categoriesNames = categoryUtil.categoriesNamesList();
-        cargarCategorias(categoriesNames, alreadyInsertedCategories);
+        this.view = productCreateView;
 
-        this.productCreateView.comboBoxListenerSet(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                String selectedCategory = productCreateView.getProductCategory();
+        boolean alreadyInsertedCategories = categoryModel.categoriesAlreadyInserted();
+        cargarCategorias(categoryUtil.categoriesNamesList(), alreadyInsertedCategories);
 
-                productCreateView.showSelectedView(selectedCategory);
+        this.productCreateView.comboBoxListenerSet(e -> handleComboBoxSelection(e));
+    }
 
-                modularView = productCreateView.getModularView();
+    private void handleComboBoxSelection(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            String selectedCategory = productCreateView.getProductCategory();
+            productCreateView.showSelectedView(selectedCategory);
+            modularView = productCreateView.getModularView();
+            if (modularView != null) {
                 modularView.loadComboBoxValues();
                 setModularPrices();
             }
-        });
+        }
     }
 
     public void initListeners() {

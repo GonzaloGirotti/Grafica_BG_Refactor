@@ -3,8 +3,6 @@ package presenters.product;
 import presenters.StandardPresenter;
 import utils.CategoryParser;
 import utils.Product;
-import utils.TextUtils;
-import utils.databases.CategoriesDatabaseConnection;
 import utils.databases.ProductsDatabaseConnection;
 import views.products.list.IProductListView;
 import models.IProductListModel;
@@ -17,7 +15,6 @@ import java.util.logging.Logger;
 public class ProductListPresenter extends StandardPresenter {
     private final IProductListView productListView;
     private final IProductListModel productListModel;
-    private IProductSearchView productSearchView;
     private final ProductsDatabaseConnection productsDatabaseConnection;
     private static CategoryParser categoryParser;
     private static Logger LOGGER;
@@ -51,13 +48,11 @@ public class ProductListPresenter extends StandardPresenter {
     public void setProductsOnTable() {
         ArrayList<Product> products = productListModel.getProductsFromDB();
         int rowCount = 0;
-        int productID = 0;
-        int productCategoryID = 0;
+        int productCategoryID;
         String productCategoryName = "";
 
             for (Product product : products) {
                 try {
-                    productID = productsDatabaseConnection.getProductID(product.getName());
                     productCategoryID = productsDatabaseConnection.getCategoryID(product.getName());
                     productCategoryName = productsDatabaseConnection.getCategoryName(productCategoryID);
                 } catch (Exception e) {
@@ -71,7 +66,7 @@ public class ProductListPresenter extends StandardPresenter {
                 productListView.setStringTableValueAt(rowCount, 0, product.getName());
                 productListView.setDoubleTableValueAt(rowCount, 1, clientPrice);
                 productListView.setDoubleTableValueAt(rowCount, 2, particularPrice);
-                productListView.setStringTableValueAt(rowCount, 3, categoryParser.parseCategory(productCategoryName));
+                productListView.setStringTableValueAt(rowCount, 3, CategoryParser.parseCategory(productCategoryName));
                 rowCount++;
         }
     }

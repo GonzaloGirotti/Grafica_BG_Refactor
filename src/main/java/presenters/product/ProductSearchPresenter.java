@@ -37,19 +37,21 @@ public class ProductSearchPresenter extends ProductPresenter {
         this.categoryModel = categoryModel;
         this.settingsModel = settingsModel;
 
-        this.productSearchView.setTableListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int selectedRow = productSearchView.getProductResultTable().getSelectedRow();
-                if (selectedRow != -1) {
-                    String selectedCategory = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 1);
-                    String selectedProductName = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 0);
-                    Product selectedProduct = productModel.getOneProduct(productModel.getProductID(selectedProductName));
-                    productSearchView.showSelectedView(selectedCategory, selectedProduct);
-                    modularView = productSearchView.getModularView();
-                }
-            }
-        });
+        this.productSearchView.setTableListener(e -> handleTableSelection(e));
         cargarCategorias();
+    }
+
+    private void handleTableSelection(javax.swing.event.ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {
+            int selectedRow = productSearchView.getProductResultTable().getSelectedRow();
+            if (selectedRow != -1) {
+                String selectedCategory = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 1);
+                String selectedProductName = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 0);
+                Product selectedProduct = productModel.getOneProduct(productModel.getProductID(selectedProductName));
+                productSearchView.showSelectedView(selectedCategory, selectedProduct);
+                modularView = productSearchView.getModularView();
+            }
+        }
     }
 
 
@@ -80,7 +82,6 @@ public class ProductSearchPresenter extends ProductPresenter {
         JComboBox categoryComboBox = productSearchView.getCategoriesComboBox();
         String selectedCategory = CategoryParser.getProductCategoryEnglish((String) categoryComboBox.getSelectedItem());
         productModel.queryProducts(productName, selectedCategory);
-        String productCategoryName = "";
     }
 
     public void onHomeSearchProductButtonClicked() {
@@ -131,25 +132,15 @@ public class ProductSearchPresenter extends ProductPresenter {
         return Double.parseDouble(settingsModel.getModularValue(tableName, selectedValue));
     }
 
-    public Product getSelectedProduct(String productName) {
-        int productID = productModel.getProductID(productName);
-        Product product = productModel.getOneProduct(productID);
-        if (product == null) {
-            JOptionPane.showMessageDialog(null, "No product selected", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        return product;
-    }
-
     public Map<String, String> getProductAttributes(Product product) {
         int productID = productModel.getProductID(product.getName()); //GET THE PRODUCT ID TO OBTAIN THER PRODUCT
         Map<String, String> attributes = productModel.getProductAttributes(productID); //GET THE PRODUCT ATTRIBUTES USING THE PRODUCT ID
-        String productCategory = productModel.getCategoryName(product.getCategoryID()); //GET THE PRODUCT CATEGORY USING THE PRODUCT ID
         return attributes;
     }
 
     public void onModifyButtonPressed(){
         int selectedRow = productSearchView.getProductResultTable().getSelectedRow();
-        ArrayList<Attribute> attributes = new ArrayList<>();
+        ArrayList<Attribute> attributes;
         JTextField newProductNameTextField = productSearchView.getNewProductNameTextField();
 
         if (selectedRow != -1) {

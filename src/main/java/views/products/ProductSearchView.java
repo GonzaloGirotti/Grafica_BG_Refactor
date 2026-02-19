@@ -1,26 +1,23 @@
 package views.products;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
+
 import lombok.Getter;
 import presenters.StandardPresenter;
 import presenters.product.ProductListPresenter;
 import presenters.product.ProductPresenter;
 import presenters.product.ProductSearchPresenter;
 import utils.CategoryParser;
+import utils.GetCategoryPanelsMap;
 import utils.Product;
 import utils.TextUtils;
 import views.ToggleableView;
 import views.products.modular.IModularCategoryView;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +47,7 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
     private JPanel modularContainer;
     private JButton modifyProductButton;
     private JPanel modifyProductButtonContainer;
+    @Getter
     private JTextField newProductNameTextField;
     private JButton deleteAllProductsButton;
     private ProductSearchPresenter productSearchPresenter;
@@ -58,6 +56,7 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
     private final ProductListPresenter productListPresenter;
     @Getter
     private IModularCategoryView modularView;
+    private final GetCategoryPanelsMap getCategoryPanelsMap = new GetCategoryPanelsMap();
 
     public ProductSearchView(ProductListPresenter productListPresenter) {
         windowFrame = new JFrame("Buscar Productos");
@@ -143,7 +142,6 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
             modularView.loadComboBoxValues();
             modularView.setSearchTextFields(product);
             modularView.calculateDependantPrices();
-
         }
 
         // Actualizar el layout del panel
@@ -161,7 +159,7 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
 
     public IModularCategoryView getCorrespondingModularView(String category) {
         IModularCategoryView correspondingModularView = null;
-        Map<String, IModularCategoryView> panelesCategorias = getCategoryPanelsMap();
+        Map<String, IModularCategoryView> panelesCategorias = getCategoryPanelsMap.getCategoryPanelsMap(productSearchPresenter);
 
         for (String categoria : panelesCategorias.keySet()) {
 
@@ -178,29 +176,6 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
         newProductNameTextField.setText((String) selectedProductName);
     }
 
-    public Map<String, IModularCategoryView> getCategoryPanelsMap() {
-        String directoryPath = "src/main/java/views/products/modular";
-        List<String> nombresDeModulars = textUtils.getFileNamesInDirectory(directoryPath);
-
-        nombresDeModulars.removeIf(nombreCompleto -> nombreCompleto.startsWith("I"));
-
-        List<String> subStringModulars = new ArrayList<>();
-        List<IModularCategoryView> categoryViews = TextUtils.loadAllViewPanels("views.products.modular",
-                productSearchPresenter, false);
-        Map<String, IModularCategoryView> categoryPanelsMap = new HashMap<>();
-
-        // Se extraen los substrings de los nombres de los modulars. EJ: ModularCapView
-        // -> Cap
-        for (String stringModular : nombresDeModulars) {
-            String subString = textUtils.extractor(stringModular);
-            subStringModulars.add(subString);
-        }
-        for (int i = 0; i < subStringModulars.size(); i++) {
-            categoryPanelsMap.put(subStringModulars.get(i), categoryViews.get(i));
-        }
-        return categoryPanelsMap;
-    }
-
     @Override
     public void clearView() {
         for (int row = 0; row < productResultTable.getRowCount(); row++) {
@@ -215,10 +190,6 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
     @Override
     public String getNameSearchText() {
         return searchField.getText();
-    }
-
-    public JTextField getNewProductNameTextField() {
-        return newProductNameTextField;
     }
 
     public void setStringTableValueAt(int row, int col, String value) {
@@ -238,33 +209,8 @@ public class ProductSearchView extends ToggleableView implements IProductSearchV
         return productResultTable.getSelectedRow();
     }
 
-    public String getSelectedProductName() {
-        String productName = "";
-        int row = getSelectedTableRow();
-        try {
-            productName = (String) productResultTable.getValueAt(getSelectedTableRow(), 0);
-            return productName;
-        } catch (ArrayIndexOutOfBoundsException e) {
-            JOptionPane.showMessageDialog(null, "No product selected", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
-        deselectAllRows();
-
-        return null;
-    }
-
     public void deselectAllRows() {
         productResultTable.clearSelection();
-    }
-
-    public ArrayList<String> getMultipleSelectedProductNames() {
-        ArrayList<String> productNames = new ArrayList<>();
-        int[] selectedRows = productResultTable.getSelectedRows();
-        for (int selectedRow : selectedRows) {
-            String productName = (String) productResultTable.getValueAt(selectedRow, 0);
-            productNames.add(productName);
-        }
-        return productNames;
     }
 
     @Override

@@ -1,11 +1,9 @@
 package views.products;
 
-import utils.Attribute;
 import utils.Product;
 import views.IToggleableView;
 import views.products.modular.IModularCategoryView;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -16,8 +14,6 @@ public interface IProductSearchView extends IToggleableView {
     void setDoubleTableValueAt(int row, int col, double value);
     void setIntTableValueAt(int row, int col, int value);
     void clearView();
-    String getSelectedProductName();
-    ArrayList<String> getMultipleSelectedProductNames();
     int getSelectedTableRow();
     void deselectAllRows();
     JTable getProductResultTable();

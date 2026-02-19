@@ -1,15 +1,11 @@
 package views.products;
 
-import com.intellij.uiDesigner.core.GridConstraints;
-import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 import lombok.Getter;
 import models.CategoryModel;
 import presenters.StandardPresenter;
-import presenters.categories.ModularCategoriesPresenter;
 import presenters.product.ProductCreatePresenter;
 import presenters.product.ProductPresenter;
-import utils.TextUtils;
+import utils.GetCategoryPanelsMap;
 import utils.databases.CategoriesDatabaseConnection;
 import utils.databases.ProductsDatabaseConnection;
 import views.ToggleableView;
@@ -18,8 +14,6 @@ import views.products.modular.IModularCategoryView;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,14 +41,12 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
     private ProductCreatePresenter productCreatePresenter;
     private ProductPresenter productPresenter;
     private CategoryModel categoryModel;
-    private final TextUtils textUtils = new TextUtils();
     @Getter
     private IModularCategoryView modularView;
     private final CategoriesDatabaseConnection categoriesDatabaseConnection = new CategoriesDatabaseConnection();
     private final ProductsDatabaseConnection productDatabaseConnection = new ProductsDatabaseConnection();
-    private Map<String, JPanel> viewMap;
+    private final GetCategoryPanelsMap getCategoryPanelsMap = new GetCategoryPanelsMap();
     private final Map<String, IModularCategoryView> modularMap;
-    private ModularCategoriesPresenter modularCategoriesPresenter;
     private int lastProductCreatedID = -1;
 
     public ProductCreateView() {
@@ -69,8 +61,7 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
         cambiarTamanioFuente(containerPanel, 14);
         windowFrame.setResizable(true);
         modularContainer.setLayout(new BorderLayout());
-        modularMap = getCategoryPanelsMap();
-
+        modularMap = getCategoryPanelsMap.getCategoryPanelsMap(productCreatePresenter);
     }
 
 
@@ -94,7 +85,7 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
 
     public IModularCategoryView getCorrespondingModularView(String category) {
         IModularCategoryView correspondingModularView = null;
-        Map<String, IModularCategoryView> panelesCategorias = getCategoryPanelsMap();
+        Map<String, IModularCategoryView> panelesCategorias = getCategoryPanelsMap.getCategoryPanelsMap(productCreatePresenter);
 
         for (String categoria : panelesCategorias.keySet()) {
 
@@ -104,29 +95,6 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
             }
         }
         return correspondingModularView;
-    }
-
-    public Map<String, IModularCategoryView> getCategoryPanelsMap() {
-        String directoryPath = "src/main/java/views/products/modular";
-        List<String> nombresDeModulars = textUtils.getFileNamesInDirectory(directoryPath);
-
-        nombresDeModulars.removeIf(nombreCompleto -> nombreCompleto.startsWith("I"));
-
-        List<String> subStringModulars = new ArrayList<>();
-        List<IModularCategoryView> categoryViews = TextUtils.loadAllViewPanels("views.products.modular", productCreatePresenter, true
-        );
-        Map<String, IModularCategoryView> categoryPanelsMap = new HashMap<>();
-
-        //Se extraen los substrings de los nombres de los modulars. EJ: ModularCapView -> Cap
-        for (String stringModular : nombresDeModulars) {
-            String subString = textUtils.extractor(stringModular);
-            subStringModulars.add(subString);
-        }
-
-        for (int i = 0; i < subStringModulars.size(); i++) {
-            categoryPanelsMap.put(subStringModulars.get(i), categoryViews.get(i));
-        }
-        return categoryPanelsMap;
     }
 
     @Override
@@ -142,33 +110,19 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
     @Override
     public String getProductCategoryEnglish() {
         String s = (String) categoryComboBox.getSelectedItem();
-        switch (s) {
-            case "Taza":
-                return "Cup";
-            case "Gorra":
-                return "Cap";
-            case "Prenda":
-                return "Clothes";
-            case "Tela":
-                return "Cloth";
-            case "Bandera":
-                return "Flag";
-            case "Servicios comunes":
-                return "CommonServices";
-            case "Servicio de corte":
-                return "CuttingService";
-            case "Impresión lineal":
-                return "LinearPrinting";
-            case "Impresión en metro cuadrado":
-                return "SquareMeterPrinting";
-            default:
-                return s;
-        }
-    }
-
-    @Override
-    public void setProductPriceField(String productPrice) {
-        productPriceField.setText(productPrice);
+        assert s != null; // Esta línea evita el error de posible null. Hace que el programa falle si s es null, lo cual no debería suceder si el combo box está correctamente configurado.
+        return switch (s) {
+            case "Taza" -> "Cup";
+            case "Gorra" -> "Cap";
+            case "Prenda" -> "Clothes";
+            case "Tela" -> "Cloth";
+            case "Bandera" -> "Flag";
+            case "Servicios comunes" -> "CommonServices";
+            case "Servicio de corte" -> "CuttingService";
+            case "Impresión lineal" -> "LinearPrinting";
+            case "Impresión en metro cuadrado" -> "SquareMeterPrinting";
+            default -> s;
+        };
     }
 
     @Override
@@ -215,16 +169,6 @@ public class ProductCreateView extends ToggleableView implements IProductCreateV
     @Override
     public void comboBoxListenerSet(ItemListener listener) {
         categoryComboBox.addItemListener(listener);
-    }
-
-    @Override
-    public void componentsListenerSet(ItemListener listener) {
-        IModularCategoryView modularView = getCorrespondingModularView((String) categoryComboBox.getSelectedItem());
-        modularCategoriesPresenter.initListeners();
-    }
-
-    public JCheckBox getEditPriceCheckBox() {
-        return priceEditCheckBox;
     }
 
 }

@@ -8,7 +8,6 @@ import utils.Attribute;
 import utils.Product;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public interface IProductModel {
@@ -23,12 +22,9 @@ public interface IProductModel {
     int getProductID(String productName);
     void deleteOneProduct(int productID, boolean isModify);
     String getCategoryName(int categoryID);
-
     void instantiateProductAttributes(int productID, ArrayList<Attribute> attributes, int categoryID);
-
     int getCategoryID(String categoryName);
     Product getOneProduct(int productID);
     Map<String, String> getProductAttributes(int productID);
-    void DeleteProductAttributes(int productID);
     void updateProductName(int productID, String newName);
 }

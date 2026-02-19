@@ -18,21 +18,16 @@ public class ProductListModel implements IProductListModel {
     private final ProductsDatabaseConnection productsDBConnection;
     private static Logger LOGGER;
 
-    private final ArrayList<Product> products;
-
     public ProductListModel(ProductsDatabaseConnection productsDBConnection) {
         this.productsDBConnection = productsDBConnection;
-        products = new ArrayList<>();
 
         this.productListOpeningSuccessListeners = new LinkedList<>();
         this.productListOpeningFailureListeners = new LinkedList<>();
     }
 
     public ArrayList<Product> getProductsFromDB() {
-        ArrayList <Product> products = new ArrayList<>();
-        ProductsDatabaseConnection Prod = new ProductsDatabaseConnection();
         try {
-            return products = Prod.getAllProducts();
+            return productsDBConnection.getAllProducts();
         } catch (SQLException e) {
             LOGGER.log(null,"ERROR IN METHOD 'getProductsFromDB' IN CLASS->'ProductListModel'",e);
 
