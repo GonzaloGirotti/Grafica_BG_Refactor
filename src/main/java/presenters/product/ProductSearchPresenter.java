@@ -1,6 +1,5 @@
 package presenters.product;
 
-
 import models.ICategoryModel;
 import models.IProductModel;
 import models.settings.ISettingsModel;
@@ -12,7 +11,6 @@ import utils.databases.SettingsTableNames;
 import views.products.IProductSearchView;
 import utils.Product;
 import views.products.modular.IModularCategoryView;
-
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -37,7 +35,7 @@ public class ProductSearchPresenter extends ProductPresenter {
         this.categoryModel = categoryModel;
         this.settingsModel = settingsModel;
 
-        this.productSearchView.setTableListener(e -> handleTableSelection(e));
+        this.productSearchView.setTableListener(this::handleTableSelection);
         cargarCategorias();
     }
 
@@ -53,7 +51,6 @@ public class ProductSearchPresenter extends ProductPresenter {
             }
         }
     }
-
 
     @Override
     protected void initListeners() {
@@ -79,8 +76,9 @@ public class ProductSearchPresenter extends ProductPresenter {
     public void onSearchButtonClicked() {
         productSearchView.clearView();
         String productName = productSearchView.getNameSearchText();
-        JComboBox categoryComboBox = productSearchView.getCategoriesComboBox();
-        String selectedCategory = CategoryParser.getProductCategoryEnglish((String) categoryComboBox.getSelectedItem());
+        JComboBox<String> categoryComboBox = productSearchView.getCategoriesComboBox();
+        Object selectedItem = categoryComboBox.getSelectedItem();
+        String selectedCategory = selectedItem != null ? CategoryParser.getProductCategoryEnglish((String) selectedItem) : "";
         productModel.queryProducts(productName, selectedCategory);
     }
 
@@ -97,10 +95,10 @@ public class ProductSearchPresenter extends ProductPresenter {
         }
     }
 
-    public void deleteOneProduct() { //TOMA EL ID DEL PRODUCTO SELECCIONADO
+    public void deleteOneProduct() {
         int selectedRow = productSearchView.getProductResultTable().getSelectedRow();
-        int productID = -1;
-        Object rowValue = "";
+        int productID;
+        Object rowValue;
 
         if (selectedRow != -1) {
             rowValue = productSearchView.getProductResultTable().getValueAt(selectedRow, 0);
@@ -133,18 +131,16 @@ public class ProductSearchPresenter extends ProductPresenter {
     }
 
     public Map<String, String> getProductAttributes(Product product) {
-        int productID = productModel.getProductID(product.getName()); //GET THE PRODUCT ID TO OBTAIN THER PRODUCT
-        Map<String, String> attributes = productModel.getProductAttributes(productID); //GET THE PRODUCT ATTRIBUTES USING THE PRODUCT ID
-        return attributes;
+        int productID = productModel.getProductID(product.getName());
+        return productModel.getProductAttributes(productID);
     }
 
-    public void onModifyButtonPressed(){
+    public void onModifyButtonPressed() {
         int selectedRow = productSearchView.getProductResultTable().getSelectedRow();
-        ArrayList<Attribute> attributes;
+        ArrayList<Attribute> attributes = new ArrayList<>();
         JTextField newProductNameTextField = productSearchView.getNewProductNameTextField();
 
         if (selectedRow != -1) {
-
             String selectedCategory = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 1);
             String englishCategory = CategoryParser.getProductCategoryEnglish(selectedCategory);
 
@@ -165,13 +161,11 @@ public class ProductSearchPresenter extends ProductPresenter {
             updateProductName(newproductID, newProductName);
             productModel.instantiateProductAttributes(newproductID, attributes, categoryID);
 
-            //Show a message to the user
             JOptionPane.showMessageDialog(null, "Producto modificado con éxito!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
             productSearchView.hideModularView();
             productSearchView.clearModularView();
-            onSearchButtonClicked(); //REFRESH THE TABLE WITH THE NEW PRODUCT
-
+            onSearchButtonClicked();
         }
     }
 
@@ -182,98 +176,3 @@ public class ProductSearchPresenter extends ProductPresenter {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*    public Map<String, String> replaceGeneralSettingsValues(Map<String, String> attributes, String productCategory) {
-        for (Map.Entry<String, String> entry : attributes.entrySet()) { //ITERATE THROUGH THE ATTRIBUTES
-
-            String attributeName = entry.getKey();
-            String attributeValue = entry.getValue();
-
-            if (attributeValue == "###") { //IF THE ATTRIBUTE VALUE IS ###, IT MEANS THAT THE ATTRIBUTE VALUE COMES FROM THE SETTINGS
-
-                attributes.remove(attributeName);
-
-                switch (attributeName) {
-                    case "Gorra":
-                        attributes.put("Gorra", String.valueOf(getIndividualPrice(SettingsTableNames.GENERAL, "Gorra")));
-                        break;
-                    case "Dolar":
-                        attributes.put("Dólar", String.valueOf(getIndividualPrice(SettingsTableNames.GENERAL, "Dólar")));
-                        break;
-                    case "Recargo por particular":
-                        attributes.put("Recargo por particular", String.valueOf(getIndividualPrice(SettingsTableNames.GENERAL, "Recargo por particular")));
-                        break;
-                    case "Taza":
-                        attributes.put("Taza", String.valueOf(getIndividualPrice(SettingsTableNames.GENERAL, "Taza")));
-                        break;
-                }
-            }
-        }
-        return attributes;
-    }
-
-
-    public Map<String, String> replaceCategoriesSettingsValues(Map<String, String> attributes, String productCategory) {
-        for (Map.Entry<String, String> entry : attributes.entrySet()) { //ITERATE THROUGH THE ATTRIBUTES
-
-            String attributeName = entry.getKey();
-            String attributeValue = entry.getValue();
-
-            if (attributeValue == "###") { //IF THE ATTRIBUTE VALUE IS ###, IT MEANS THAT THE ATTRIBUTE VALUE COMES FROM THE SETTINGS
-                attributes.remove(attributeName);
-
-                if(productCategory.equals("Cap")){
-                    switch(attributeName) {
-                        case "T1B":
-                            attributes.put("T1B", String.valueOf(getIndividualPrice(SettingsTableNames.BAJADA_PLANCHA, "En gorra")));
-                            break;
-                        case "T2B":
-                            attributes.put("T2B", String.valueOf(getIndividualPrice(SettingsTableNames.IMPRESIONES, "Metro de Sublimación")));
-                            break;
-                        case "GANANCIA":
-                            attributes.put("GANANCIA", String.valueOf(getIndividualPrice(SettingsTableNames.GANANCIAS, "Gorras")));
-                            break;
-                    }
-                }
-
-                if(productCategory.equals("Clothes")){
-                    switch(attributeName) {
-                        case "T1B":
-                            attributes.put("T1B", String.valueOf(getIndividualPrice(SettingsTableNames.IMPRESIONES, "Metro de Sublimación"));
-                            break;
-                        case "T2B":
-                            attributes.put("T2B", String.valueOf(getIndividualPrice(SettingsTableNames.IMPRESIONES, "Metro de Sublimación")));
-                            break;
-                        case "GANANCIA":
-                            attributes.put("GANANCIA", String.valueOf(getIndividualPrice(SettingsTableNames.GANANCIAS, "Gorras")));
-                            break;
-                    }
-                }
-            }
-        }
-        return attributes;
-    }
-}*/
