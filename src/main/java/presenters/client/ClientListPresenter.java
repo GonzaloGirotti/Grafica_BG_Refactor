@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 public class ClientListPresenter extends StandardPresenter {
     private final IClientListView clientListView;
     private final IClientListModel clientListModel;
-    private IClientSearchView clientSearchView;
     private final ClientsDatabaseConnection clientsDatabaseConnection;
     private static Logger LOGGER;
 
@@ -45,24 +44,21 @@ public class ClientListPresenter extends StandardPresenter {
     }
 
     public void setClientsOnTable() {
-        ArrayList<Client> clients = clientListModel.getClientsFromDB();
+
         String clientType = "";
         int rowCount = 0;
         int clientID = 0;
+        ArrayList<Client> clients = new ArrayList<>();
 
-        for (Client client : clients) {
-            clientType = "Cliente";
+        try {
+            clients = clientListModel.getClientsFromDB();
+        } catch (Exception e) {
+            LOGGER.log(null,"ERROR IN METHOD 'setClientsOnTable' IN CLASS->'ClientListPresenter'",e);
+        }
 
-            if(!client.isClient())
-            {
-                clientType = "Particular";
-            }
-
-            try {
-                clientID = clientsDatabaseConnection.getClientID(client.getName(), clientType);
-            } catch (Exception e) {
-                LOGGER.log(null,"ERROR IN METHOD 'setClientsOnTable' IN CLASS->'ClientListPresenter'",e);
-            }
+        for(Client client : clients) {
+            clientType = client.isClient() ? "Cliente" : "Particular";
+            clientID = clientsDatabaseConnection.getClientID(client.getName(), clientType);
 
             clientListView.setIntTableValueAt(rowCount, 0, clientID);
             clientListView.setStringTableValueAt(rowCount, 1, client.getName());
@@ -70,9 +66,16 @@ public class ClientListPresenter extends StandardPresenter {
             clientListView.setStringTableValueAt(rowCount, 3, client.getCity());
             clientListView.setStringTableValueAt(rowCount, 4, client.getPhone());
             clientListView.setStringTableValueAt(rowCount, 5, clientType);
+
             rowCount++;
 
         }
     }
+
+    /*
+
+
+
+    */
 }
 

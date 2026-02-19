@@ -13,6 +13,8 @@ import presenters.client.BudgetHistoryPresenter;
 import presenters.client.ClientCreatePresenter;
 import presenters.client.ClientListPresenter;
 import presenters.client.ClientSearchPresenter;
+import presenters.factory.IPresenterFactory;
+import presenters.factory.PresenterFactoryImpl;
 import presenters.product.ProductCreatePresenter;
 import presenters.product.ProductListPresenter;
 import presenters.budget.CuttingServiceFormPresenter;
@@ -91,8 +93,6 @@ public class Main {
         SettingsView settingsView = new SettingsView();
         BudgetHistoryView budgetHistoryView = new BudgetHistoryView();
 
-
-
         ClientCreatePresenter clientCreatePresenter = new ClientCreatePresenter(clientCreateView, clientModel);
         ClientListPresenter clientListPresenter = new ClientListPresenter(clientListView, clientListModel);
         ProductCreatePresenter productCreatePresenter = new ProductCreatePresenter(productCreateView, productModel, categoryModel, settingsModel);
@@ -106,8 +106,8 @@ public class Main {
         BudgetModifyPresenter budgetModifyPresenter = new BudgetModifyPresenter(cuttingServiceFormView, budgetModifyView, budgetModel, productModel, categoryModel, budgetModifyModel, settingsModel);
         CuttingServiceFormPresenter cuttingServiceFormPresenter = new CuttingServiceFormPresenter(budgetModifyView, cuttingServiceFormView, budgetCreateView);
         BudgetHistoryPresenter budgetHistoryPresenter = new BudgetHistoryPresenter(budgetHistoryModel, budgetHistoryView, clientSearchView);
-        ClientSearchPresenter clientSearchPresenter = new ClientSearchPresenter(budgetHistoryModel, budgetHistoryView, clientSearchView, clientModel);
-
+        IPresenterFactory presenterFactory = new PresenterFactoryImpl((BudgetHistoryModel) budgetHistoryModel, budgetHistoryView, clientSearchView);
+        ClientSearchPresenter clientSearchPresenter = new ClientSearchPresenter(clientSearchView, clientModel, presenterFactory);
         BudgetSearchView budgetSearchView = new BudgetSearchView(budgetListPresenter, budgetModifyPresenter);
         BudgetSearchPresenter budgetSearchPresenter = new BudgetSearchPresenter(budgetSearchView, budgetCreateView, budgetModel, budgetModifyModel);
         SettingsPresenter settingsPresenter = new SettingsPresenter(settingsView, settingsModel);

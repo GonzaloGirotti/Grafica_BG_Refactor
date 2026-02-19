@@ -52,11 +52,7 @@ public class ClientModel implements IClientModel{
 	@Override
 	public void createClient(String clientName, String clientAddress, String clientCity, String clientPhone, boolean isClient) {
 		try {
-			if(isClient){
-				dbConnection.insertClient(clientName, clientAddress, clientCity, clientPhone, "Cliente");
-			}else {
-				dbConnection.insertClient(clientName, clientAddress, clientCity, clientPhone, "Particular");
-			}
+			dbConnection.insertClient(clientName, clientAddress, clientCity, clientPhone, isClient ? "Cliente" : "Particular");
 			lastCityAdded = clientCity;
 			notifyClientCreationSuccess();
 		} catch (Exception e) {
@@ -87,6 +83,7 @@ public class ClientModel implements IClientModel{
 			notifyCitiesFetchingFailure();
 		}
 	}
+
 	public ArrayList<String> getQueriedCities() {
 		return cities;
 	}

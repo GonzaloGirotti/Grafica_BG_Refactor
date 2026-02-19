@@ -9,7 +9,6 @@ public class ClientListModel implements IClientListModel {
 
     public ClientListModel( ClientsDatabaseConnection clientsDBConnection) {
         this.clientsDBConnection = clientsDBConnection;
-        ArrayList<Client> clients = new ArrayList<>();
     }
 
     @Override

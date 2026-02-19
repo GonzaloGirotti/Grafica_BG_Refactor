@@ -10,6 +10,5 @@ public interface IToggleableView {
 	void setWorkingStatus();
 	void setWaitingStatus();
 	void showMessage(MessageTypes messageType);
-
 	void setPresenter(StandardPresenter standardPresenter);
 }

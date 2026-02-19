@@ -1,146 +1,140 @@
 package presenters.client;
 
-import models.IBudgetHistoryModel;
 import models.IClientModel;
 import presenters.StandardPresenter;
+import presenters.factory.IPresenterFactory;
 import utils.Client;
-import utils.MessageTypes;
-import views.client.BudgetHistory.IBudgetHistoryView;
 import views.client.IClientSearchView;
 
 import java.util.ArrayList;
 import static utils.MessageTypes.*;
 
 public class ClientSearchPresenter extends StandardPresenter {
-	private final IClientSearchView clientSearchView;
-	private final IClientModel clientModel;
-    private final IBudgetHistoryModel budgetHistoryModel;
-    private final IBudgetHistoryView budgetHistoryView;
+    private final IClientSearchView clientSearchView;
+    private final IClientModel clientModel;
+	private final IPresenterFactory presenterFactory;
 
-	public ClientSearchPresenter(IBudgetHistoryModel budgetHistoryModel, IBudgetHistoryView budgetHistoryView, IClientSearchView clientSearchView, IClientModel clientModel) {
-		this.clientSearchView = clientSearchView;
-        this.budgetHistoryModel = budgetHistoryModel;
-        this.budgetHistoryView = budgetHistoryView;
-		view = clientSearchView;
-		this.clientModel = clientModel;
-	}
-	@Override
-	public void start() {
-		super.start();
-		clientModel.queryCities();
-	}
-
-	public void onHomeSearchClientButtonClicked() {
-		clientSearchView.clearView();
-		clientSearchView.showView();
-	}
-
-	@Override
-	protected void initListeners() {
-		clientModel.addClientSearchSuccessListener(() -> {
-			ArrayList<Client> clients = clientModel.getLastClientsQuery();
-			int rowCount = 0;
-			for (Client client : clients) {
-				clientSearchView.setTableValueAt(rowCount, 0, client.getName());
-				clientSearchView.setTableValueAt(rowCount, 1, client.getAddress());
-				clientSearchView.setTableValueAt(rowCount, 2, client.getCity());
-				clientSearchView.setTableValueAt(rowCount, 3, client.getPhone());
-				clientSearchView.setTableValueAt(rowCount, 4, client.isClient() ? "Cliente" : "Particular");
-				rowCount++;
-			}
-		});
-
-		clientModel.addClientSearchFailureListener(() -> clientSearchView.showMessage(CLIENT_SEARCH_FAILURE));
-		clientModel.addClientCreationEmptyFieldListener(() -> clientSearchView.showMessage(ANY_CREATION_EMPTY_FIELDS));
-
-		clientModel.addCitiesFetchingSuccessListener(() -> {
-			ArrayList<String> cities = clientModel.getQueriedCities();
-			for (String city : cities) {
-				clientSearchView.addCityToComboBox(city);
-			}
-		});
-
-		clientModel.addCitiesFetchingFailureListener(() -> clientSearchView.showMessage(CITY_FETCH_FAILURE));
-
-		clientModel.addClientCreationSuccessListener(() -> {
-			String lastCityAdded = clientModel.getLastCityAdded();
-			if(!clientSearchView.isCityInComboBox(lastCityAdded)){
-				clientSearchView.addCityToComboBox(lastCityAdded);
-			}
-		});
-	}
-
-
-	public void onSearchButtonClicked() {
-
-		clientSearchView.setWorkingStatus();
-
-		String searchedName = clientSearchView.getnameSearchText();
-		String searchedCity = clientSearchView.getSelectedCity();
-
-		clientSearchView.clearTable();
-
-		if (searchedCity.equals("Cualquier localidad")) { searchedCity = ""; }
-
-		clientModel.queryClients(searchedName, searchedCity);
-
-		clientSearchView.setWaitingStatus();
-
-	}
-
-	public void onDeleteClientButtonClicked() {
-		int[] selectedRows = clientSearchView.getClientResultTable().getSelectedRows();
-		if(selectedRows.length == 1) {
-			deleteOneClient();
-		} else {
-			clientSearchView.showMessage(CLIENT_DELETION_FAILURE);
-		}
-	}
-
-	public void deleteOneClient() {
-		int selectedRow = clientSearchView.getSelectedTableRow();
-		if(selectedRow != -1){
-			if(!clientSearchView.getClientStringTableValueAt(selectedRow, 0).isEmpty()){
-					int oneClientID = getOneClientID(selectedRow);
-					clientModel.deleteOneClient(oneClientID);
-
-					clientSearchView.setWorkingStatus();
-					clientSearchView.clearTable();
-					String searchedName = clientSearchView.getnameSearchText();
-					String searchedCity = clientSearchView.getSelectedCity();
-					if (searchedCity.equals("Cualquier localidad")) { searchedCity = ""; }
-					clientModel.queryClients(searchedName, searchedCity);
-					clientSearchView.deselectAllRows();
-					clientSearchView.setWaitingStatus();
-			} else{	clientSearchView.showMessage(CLIENT_DELETION_FAILURE);	}
-		} else{	clientSearchView.showMessage(CLIENT_DELETION_FAILURE);	}
-	}
-
-	public int getOneClientID(int selectedRow) {
-		String clientName = clientSearchView.getClientStringTableValueAt(selectedRow, 0);
-		String clientType = clientSearchView.getClientStringTableValueAt(selectedRow, 4);
-		int clientID = -1;
-
-		if(selectedRow != -1 && !clientName.isEmpty() && !clientType.isEmpty()) {
-			if(clientType.equals("Cliente")) {
-				clientID = clientModel.getClientID(clientName, "Cliente");
-			} else {
-				clientID = clientModel.getClientID(clientName, "Particular");
-			}
-		}
-
-		return clientID;
-	}
-
-    public void onShowBudgetHistoryMenuItemClicked() {
-            BudgetHistoryPresenter budgetHistoryPresenter = new BudgetHistoryPresenter(budgetHistoryModel, budgetHistoryView, clientSearchView);
-            boolean thereAreBudgets = budgetHistoryPresenter.setBudgetHistoryTable();
-
-            if(!thereAreBudgets){
-                clientSearchView.showMessage(CLIENT_BUDGET_NO_BUDGETS);
-                return;
-            }
-
-            budgetHistoryView.showView();
+    public ClientSearchPresenter(IClientSearchView clientSearchView, IClientModel clientModel, IPresenterFactory presenterFactory) {
+        this.clientSearchView = clientSearchView;
+        view = clientSearchView;
+        this.clientModel = clientModel;
+		this.presenterFactory = presenterFactory;
     }
+
+    @Override
+    public void start() {
+        super.start();
+        clientModel.queryCities();
+    }
+
+    public void onHomeSearchClientButtonClicked() {
+        clientSearchView.clearView();
+        clientSearchView.showView();
+    }
+
+    @Override
+    protected void initListeners() {
+        clientModel.addClientSearchSuccessListener(() -> updateClientTable(clientModel.getLastClientsQuery()));
+        clientModel.addClientSearchFailureListener(() -> clientSearchView.showMessage(CLIENT_SEARCH_FAILURE));
+        clientModel.addClientCreationEmptyFieldListener(() -> clientSearchView.showMessage(ANY_CREATION_EMPTY_FIELDS));
+        clientModel.addCitiesFetchingSuccessListener(() -> updateCityComboBox(clientModel.getQueriedCities()));
+        clientModel.addCitiesFetchingFailureListener(() -> clientSearchView.showMessage(CITY_FETCH_FAILURE));
+        clientModel.addClientCreationSuccessListener(() -> addCityIfNotExists(clientModel.getLastCityAdded()));
+    }
+
+    private void updateClientTable(ArrayList<Client> clients) {
+        int rowCount = 0;
+        for (Client client : clients) {
+            clientSearchView.setTableValueAt(rowCount, 0, client.getName());
+            clientSearchView.setTableValueAt(rowCount, 1, client.getAddress());
+            clientSearchView.setTableValueAt(rowCount, 2, client.getCity());
+            clientSearchView.setTableValueAt(rowCount, 3, client.getPhone());
+            clientSearchView.setTableValueAt(rowCount, 4, client.isClient() ? "Cliente" : "Particular");
+            rowCount++;
+        }
+    }
+
+    private void updateCityComboBox(ArrayList<String> cities) {
+        for (String city : cities) {
+            clientSearchView.addCityToComboBox(city);
+        }
+    }
+
+    private void addCityIfNotExists(String lastCityAdded) {
+        if (!clientSearchView.isCityInComboBox(lastCityAdded)) {
+            clientSearchView.addCityToComboBox(lastCityAdded);
+        }
+    }
+
+    public void onSearchButtonClicked() {
+        clientSearchView.setWorkingStatus();
+        String searchedName = clientSearchView.getnameSearchText();
+        String searchedCity = clientSearchView.getSelectedCity();
+        clientSearchView.clearTable();
+        if (searchedCity.equals("Cualquier localidad")) {
+            searchedCity = "";
+        }
+        clientModel.queryClients(searchedName, searchedCity);
+        clientSearchView.setWaitingStatus();
+    }
+
+    public void onDeleteClientButtonClicked() {
+        int[] selectedRows = getSelectedRowsSafely();
+        if (selectedRows.length == 1) {
+            deleteOneClient();
+        } else {
+            clientSearchView.showMessage(CLIENT_DELETION_FAILURE);
+        }
+    }
+
+    private int[] getSelectedRowsSafely() {
+        try {
+            return clientSearchView.getClientResultTable().getSelectedRows();
+        } catch (Exception e) {
+            clientSearchView.showMessage(NO_ROW_SELECTED);
+            return new int[0];
+        }
+    }
+
+    public void deleteOneClient() {
+        int selectedRow = clientSearchView.getSelectedTableRow();
+        if (selectedRow != -1 && !clientSearchView.getClientStringTableValueAt(selectedRow, 0).isEmpty()) {
+            int oneClientID = getOneClientID(selectedRow);
+            clientModel.deleteOneClient(oneClientID);
+            refreshClientTable();
+        } else {
+            clientSearchView.showMessage(CLIENT_DELETION_FAILURE);
+        }
+    }
+
+    private void refreshClientTable() {
+        clientSearchView.setWorkingStatus();
+        clientSearchView.clearTable();
+        String searchedName = clientSearchView.getnameSearchText();
+        String searchedCity = clientSearchView.getSelectedCity();
+        if (searchedCity.equals("Cualquier localidad")) {
+            searchedCity = "";
+        }
+        clientModel.queryClients(searchedName, searchedCity);
+        clientSearchView.deselectAllRows();
+        clientSearchView.setWaitingStatus();
+    }
+
+    public int getOneClientID(int selectedRow) {
+        String clientName = clientSearchView.getClientStringTableValueAt(selectedRow, 0);
+        String clientType = clientSearchView.getClientStringTableValueAt(selectedRow, 4);
+        if (selectedRow != -1 && !clientName.isEmpty() && !clientType.isEmpty()) {
+            return clientModel.getClientID(clientName, clientType.equals("Cliente") ? "Cliente" : "Particular");
+        }
+        return -1;
+    }
+
+	public void onShowBudgetHistoryMenuItemClicked() {
+		BudgetHistoryPresenter nextPresenter = presenterFactory.createBudgetHistoryPresenter();
+		if (!nextPresenter.setBudgetHistoryTable()) { // Si no hay presupuestos, se muestra un mensaje y no se inicia el siguiente presenter
+			clientSearchView.showMessage(CLIENT_BUDGET_NO_BUDGETS);
+			return;
+		}
+		presenterFactory.showBudgetHistoryView();
+	}
 }
