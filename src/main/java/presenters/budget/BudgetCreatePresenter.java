@@ -26,9 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import static utils.TextUtils.truncateAndRound;
-import static utils.databases.SettingsTableNames.GENERAL;
 
 
 //  --------> BUDGET CREATE PRESENTER CLASS STARTS HERE <-------------
@@ -102,7 +100,6 @@ public class BudgetCreatePresenter extends StandardPresenter {
         //FILTRAR
         String productName = budgetCreateView.getProductsTextField().getText(); // PRODUCT NAME SEARCHED
         List<String> categoriesName = categoryModel.getCategoriesName(); // GET CATEGORIES NAMES
-        JComboBox categoryComboBox = budgetCreateView.getCategoriesComboBox(); // GET CATEGORIES COMBO BOX
         Pair<Double, Double> pricePair;
 
         //BUSCA SEGUN LOS FILTROS Y AGREGA LOS PRODUCTOS FILTRADOS A UN ARRAYLIST
@@ -145,20 +142,28 @@ public class BudgetCreatePresenter extends StandardPresenter {
 
     // IF THE SEARCH CLIENT BUTTON IS CLICKED:
     public void OnSearchClientButtonClicked() {
-        String city = "";
-        String clientType = "";
+        String city = ""; // CITY STRING VARIABLE
+        String clientType = ""; // CLIENT TYPE STRING VARIABLE
+        int clientID = -1; // CLIENT ID VARIABLE
+        ArrayList<Client> clients; // CLIENTS ARRAYLIST
+
         city = (String) budgetCreateView.getCitiesComboBox().getSelectedItem(); // GET CITY
         String name = budgetCreateView.getBudgetClientName(); // GET BUDGET CLIENT NAME
-        int clientID = -1; // CLIENT ID VARIABLE
 
         // IF CITY IS "SELECCIONE UNA CIUDAD"
         if (city.equals("Seleccione una ciudad")) {
             city = ""; // SET CITY TO EMPTY STRING
         }
 
+        try{
+            globalClientsList = budgetModel.getClients(name, city); // GLOBAL VARIABLE -> GET CLIENTS BY NAME AND CITY
+            clients = budgetModel.getClients(name, city); // LOCAL VARIABLE -> GET CLIENTS BY NAME AND CITY
+        } catch (Exception e) {
+            budgetCreateView.showMessage(MessageTypes.CLIENT_SEARCH_FAILURE); // SHOW MESSAGE CLIENT SEARCH FAILURE
+            System.out.println(e.getMessage());
+            return;
+        }
 
-        globalClientsList = budgetModel.getClients(name, city); // GLOBAL VARIABLE -> GET CLIENTS BY NAME AND CITY
-        ArrayList<Client> clients = budgetModel.getClients(name, city); // LOCAL VARIABLE -> GET CLIENTS BY NAME AND CITY
         budgetCreateView.clearClientTable(); // CLEAR CLIENT TABLE
         int rowCount = 0; // ROW COUNT VARIABLE
 
@@ -215,11 +220,7 @@ public class BudgetCreatePresenter extends StandardPresenter {
     public void updatePriceColumnByRecharge(String clientType) {
         globalBudgetTotalPrice = 0;
 
-        if(productsRowCountOnPreviewTable != 0){
-            thereAreProductsInPreviewTable = true;
-        } else {
-            thereAreProductsInPreviewTable = false;
-        }
+        thereAreProductsInPreviewTable = productsRowCountOnPreviewTable != 0;
 
         if(thereAreProductsInPreviewTable){
             for (int i = 1; i <= productsRowCountOnPreviewTable; i++) {
@@ -315,6 +316,15 @@ public class BudgetCreatePresenter extends StandardPresenter {
         return product;
     }
 
+    public double GetSelectedProductUnitPrice() {
+        double unitPrice = 0.0;
+        int selectedProductRow = budgetCreateView.getProductTableSelectedRow();
+        if (selectedProductRow != -1) {
+            unitPrice = Double.parseDouble(budgetCreateView.getProductStringTableValueAt(selectedProductRow, 2));
+        }
+        return unitPrice;
+    }
+
 
     public double GetSelectedTotalPrice(int selectedPreviewRow) {
         System.out.println("GETSELECTED METHOD CALLED");
@@ -337,62 +347,58 @@ public class BudgetCreatePresenter extends StandardPresenter {
 
     //AGREGA EL PRODUCTO A LA PREVIEW TABLE CUANDO CLICKEA EL BOTON "AGREGAR PRODUCTO"
     public void AddProductToPreviewTable(Product product, int row) {
+        // 1. Obtención de datos limpios
+        String amountStr = defaultIfEmpty(budgetCreateView.getAmountTextField().getText(), "1");
+        String observations = budgetCreateView.getObservationsTextField().getText();
 
-        String productName = product.getName();
-        String productAmountStr = budgetCreateView.getAmountTextField().getText();
-        String productWidthMeasures = budgetCreateView.getWidthMeasureTextField().getText();
-        String productHeightMeasures = budgetCreateView.getHeightMeasureTextField().getText();
-        String productObservations = budgetCreateView.getObservationsTextField().getText();
-        boolean unlockedMeasures = CheckMeasureFieldsAreEnabled();
-        JTable productsTable = budgetCreateView.getProductsResultTable();
-        int productTableSelectedRow = budgetCreateView.getProductTableSelectedRow();
-        double oneItemProductPrice = Double.parseDouble(budgetCreateView.getProductStringTableValueAt(productTableSelectedRow, 2));
-        double totalItemsPrice = 0.0;
-        double settingPrice = 0.0;
-        String productMeasures = "";
-        double meters = -1;
-        JTextField widthTextField = budgetCreateView.getWidthMeasureTextField();
-        JTextField heightTextField = budgetCreateView.getHeightMeasureTextField();
+        // 2. Lógica de medidas y cálculo de "factor" (metros cuadrados o lineales)
+        double measureFactor = calculateMeasureFactor();
+        String measureLabel = formatMeasureLabel();
 
-        if (productAmountStr.isEmpty()) { // IF PRODUCT AMOUNT STRING IS EMPTY
-            productAmountStr = "1";
+        // 3. Cálculos de precio
+        double unitPrice = GetSelectedProductUnitPrice();
+        double settingPrice = unitPrice * measureFactor;
+        double totalItemsPrice = settingPrice * Integer.parseInt(amountStr);
+
+        // 4. Actualización de la Vista
+        updatePreviewTable(row, product.getName(), amountStr, measureLabel, observations, settingPrice);
+        updateTextArea(true, Double.parseDouble(truncateAndRound(String.valueOf(totalItemsPrice))));
+    }
+
+// --- Métodos de apoyo para limpiar el principal ---
+
+    private double calculateMeasureFactor() {
+        if (!CheckMeasureFieldsAreEnabled()) return 1.0;
+
+        double height = Double.parseDouble(defaultIfEmpty(budgetCreateView.getHeightMeasureTextField().getText(), "1"));
+        if (budgetCreateView.getWidthMeasureTextField().isEnabled()) {
+            double width = Double.parseDouble(defaultIfEmpty(budgetCreateView.getWidthMeasureTextField().getText(), "1"));
+            return height * width;
         }
+        return height;
+    }
 
-        if (unlockedMeasures) {//ONE OR BOTH TEXTFIELDS ARE ENABLED
+    private String formatMeasureLabel() {
+        if (!CheckMeasureFieldsAreEnabled()) return "-";
 
-            if (productHeightMeasures.isEmpty()) {
-                productHeightMeasures = "1";
-            }
-            if (productWidthMeasures.isEmpty()) {
-                productWidthMeasures = "1";
-            }
-
-            if (widthTextField.isEnabled() && heightTextField.isEnabled()) { //IF ARE BOTH ENABLED
-
-                productMeasures = productWidthMeasures + "m x " + productHeightMeasures + "m";
-                meters = Double.parseDouble(productHeightMeasures) * Double.parseDouble(productWidthMeasures);
-            } else { //IF ONLY ONE IS ENABLED (HEIGHT)
-                productMeasures = productHeightMeasures + "m";
-                meters = Double.parseDouble(productHeightMeasures);
-            }
-
-            totalItemsPrice = Double.parseDouble(truncateAndRound(String.valueOf(oneItemProductPrice * Integer.parseInt(productAmountStr) * meters)));
-            settingPrice = Double.parseDouble(truncateAndRound(String.valueOf(oneItemProductPrice * meters)));
-
-        } else { //NONE OF THE TEXTFIELDS ARE ENABLED
-            productMeasures = "-";
-            totalItemsPrice = oneItemProductPrice * Integer.parseInt(productAmountStr);
-            settingPrice = oneItemProductPrice;
+        String height = defaultIfEmpty(budgetCreateView.getHeightMeasureTextField().getText(), "1");
+        if (budgetCreateView.getWidthMeasureTextField().isEnabled()) {
+            String width = defaultIfEmpty(budgetCreateView.getWidthMeasureTextField().getText(), "1");
+            return width + "m x " + height + "m";
         }
+        return height + "m";
+    }
 
+    private String defaultIfEmpty(String val, String def) {
+        return (val == null || val.isEmpty()) ? def : val;
+    }
 
-        budgetCreateView.setPreviewStringTableValueAt(row, 1, productName); //INSERTA EN LA COLUMNA DE NOMBREPRODUCTO
-        budgetCreateView.setPreviewStringTableValueAt(row, 2, productAmountStr); //INSERTA EN LA COLUMNA DE CANTIDAD
-        budgetCreateView.setPreviewStringTableValueAt(row, 3, productMeasures); //INSERTA EN LA COLUMNA DE MEDIDAS
-        budgetCreateView.setPreviewStringTableValueAt(row, 4, productObservations); //INSERTA EN LA COLUMNA DE OBSERVACIONES
-        budgetCreateView.setPreviewStringTableValueAt(row, 5, String.valueOf(settingPrice)); //INSERTA EN LA COLUMNA DE PRECIO
-        updateTextArea(true, totalItemsPrice);
-
+    private void updatePreviewTable(int row, String name, String qty, String measures, String obs, double price) {
+        budgetCreateView.setPreviewStringTableValueAt(row, 1, name);
+        budgetCreateView.setPreviewStringTableValueAt(row, 2, qty);
+        budgetCreateView.setPreviewStringTableValueAt(row, 3, measures);
+        budgetCreateView.setPreviewStringTableValueAt(row, 4, obs);
+        budgetCreateView.setPreviewStringTableValueAt(row, 5, truncateAndRound(String.valueOf(price)));
     }
 
 
@@ -414,6 +420,23 @@ public class BudgetCreatePresenter extends StandardPresenter {
         return productRowData;
     }
 
+    private double StablishProductMeasures(List<String> oneProduct) {
+        double productMeasures = 0;
+
+        if(!oneProduct.get(2).equals("-")){
+            if(oneProduct.get(2).contains("x")){
+                String[] measures = oneProduct.get(2).split("m x ");
+                measures[1] = measures[1].replace("m", "");
+                productMeasures = (Double.parseDouble(measures[0]) * Double.parseDouble(measures[1]));
+            } else {
+                String measure = oneProduct.get(2).replace("m", "");
+                productMeasures = Double.parseDouble(measure);
+            }
+        }
+
+        return productMeasures;
+    }
+
     public ArrayList<Row> getAllProductsFromPreviewTable(boolean isParticular) {
         ArrayList<Row> productRowData = new ArrayList<>();
         List<String> oneProduct;
@@ -427,18 +450,7 @@ public class BudgetCreatePresenter extends StandardPresenter {
         for (int i = 1; i <= productsRowCountOnPreviewTable; i++) {
             oneProduct = GetOneProductFromPreviewTable(i);
             product = productModel.getOneProduct(productModel.getProductID(oneProduct.get(0)));
-
-            double productMeasures = 1;
-            if(!oneProduct.get(2).equals("-")){
-                if(oneProduct.get(2).contains("x")){
-                    String[] measures = oneProduct.get(2).split("m x ");
-                    measures[1] = measures[1].replace("m", "");
-                    productMeasures = (Double.parseDouble(measures[0]) * Double.parseDouble(measures[1]));
-                } else {
-                    String measure = oneProduct.get(2).replace("m", "");
-                    productMeasures = Double.parseDouble(measure);
-                }
-            }
+            double productMeasures = StablishProductMeasures(oneProduct);
 
             if(product != null) {
                 productPrice = Double.parseDouble(truncateAndRound(String.valueOf(isParticular ? product.calculateRealTimePrice().getValue0() : product.calculateRealTimePrice().getValue1())));
@@ -484,8 +496,7 @@ public class BudgetCreatePresenter extends StandardPresenter {
         budgetCreateView.getProductsResultTable().clearSelection();
         JTable budgetResultTable = budgetCreateView.getPreviewTable();
         int selectedRow = budgetResultTable.getSelectedRow();
-        boolean isCuttingService;
-        double totalSelectedPrice = 0.0;
+        double totalSelectedPrice;
         if (selectedRow != -1) {
             if (productsRowCountOnPreviewTable >= 1) {
                 if(budgetResultTable.getValueAt(selectedRow,1) != null && !budgetResultTable.getValueAt(selectedRow, 1).toString().isEmpty()){

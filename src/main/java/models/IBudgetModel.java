@@ -6,6 +6,7 @@ import utils.Client;
 import utils.Product;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface IBudgetModel {
     void addBudgetCreationSuccessListener(BudgetCreationSuccessListener listener);
@@ -21,7 +22,7 @@ public interface IBudgetModel {
     Client getClientByID(int clientID);
     void createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice);
     int getNextBudgetNumber();
-    void saveProducts(int budgetID, ArrayList<Integer> productAmounts, ArrayList<String> productNames, ArrayList<String> observations, ArrayList<String> productMeasures, ArrayList<Double> productPrices);
+    void saveProducts(int budgetID, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices);
     int getBudgetID(int budgetNumber, String budgetName);
     ArrayList<String> getCitiesName();
     ArrayList<Budget> getLastBudgetsQuery();

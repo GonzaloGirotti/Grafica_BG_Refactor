@@ -210,7 +210,6 @@ public class BudgetCreateView extends ToggleableView implements IBudgetCreateVie
 
     public void restartWindow() {
         relativeSizeAndCenter(windowFrame, 1, 0.90);
-        //windowFrame.setSize(1000, 700);
         sb.setLength(0);
         sb.append("Precio Total: ");
         priceTextArea.setEditable(false);
@@ -221,55 +220,33 @@ public class BudgetCreateView extends ToggleableView implements IBudgetCreateVie
 
     public List<String[]> getPreviewTableFilledRowsData() {
         List<String[]> filledRowsData = new ArrayList<>();
-        String[] dataArray;
-
-        String budgetClientName = "";
-        String budgetProductName = "";
-        int budgetProductAmount = 1;
-        String budgetProductMeasures = "";
-        String budgetProductObservations = "";
-        double budgetProductPrice = -1.0;
-        String budgetClientType = "";
-
         int filledRows = getFilledRowsCount(budgetPreviewingTable);
-
 
         for (int row = 0; row <= filledRows; row++) {
             if (row == 0) {
-                budgetClientName = (String) budgetPreviewingTable.getValueAt(row, 0);
-                budgetClientType = (String) budgetPreviewingTable.getValueAt(row, 6);
-                dataArray = new String[]{budgetClientName, budgetClientType};
-                filledRowsData.add(dataArray);
+                // Fila de encabezado/cliente
+                filledRowsData.add(new String[]{
+                        getStringValue(row, 0),
+                        getStringValue(row, 6)
+                });
             } else {
-                Object selectedProductName = budgetPreviewingTable.getValueAt(row, 1);
-                Object selectedProductAmount = budgetPreviewingTable.getValueAt(row, 2);
-                Object selectedProductMeasures = budgetPreviewingTable.getValueAt(row, 3);
-                Object selectedProductObservations = budgetPreviewingTable.getValueAt(row, 4);
-                Object selectedProductPrice = budgetPreviewingTable.getValueAt(row, 5);
-
-                if (selectedProductName != null && !selectedProductName.equals("")) {
-                    budgetProductName = (String) selectedProductName;
-                }
-                if (selectedProductAmount != null && !selectedProductAmount.equals("")) {
-                    budgetProductAmount = Integer.parseInt((String) selectedProductAmount);
-                }
-                if (selectedProductMeasures != null && !selectedProductMeasures.equals("")) {
-                    budgetProductMeasures = (String) selectedProductMeasures;
-                }
-                if (selectedProductObservations != null && !selectedProductObservations.equals("")) {
-                    budgetProductObservations = (String) selectedProductObservations;
-                }
-                if (selectedProductPrice != null && !selectedProductPrice.equals("")) {
-                    budgetProductPrice = Double.parseDouble((String) selectedProductPrice);
-                }
-
-                dataArray = new String[]{budgetProductName, String.valueOf(budgetProductAmount), budgetProductMeasures, budgetProductObservations, String.valueOf(budgetProductPrice)};
-
-                filledRowsData.add(dataArray);
-
+                // Filas de productos
+                filledRowsData.add(new String[]{
+                        getStringValue(row, 1),
+                        getStringValue(row, 2),
+                        getStringValue(row, 3),
+                        getStringValue(row, 4),
+                        getStringValue(row, 5)
+                });
             }
         }
         return filledRowsData;
+    }
+
+    // Método auxiliar para evitar repetición y NullPointerExceptions
+    private String getStringValue(int row, int col) {
+        Object value = budgetPreviewingTable.getValueAt(row, col);
+        return (value == null) ? "" : value.toString();
     }
 
     @Override

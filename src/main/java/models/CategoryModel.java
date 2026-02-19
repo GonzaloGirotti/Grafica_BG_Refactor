@@ -39,6 +39,15 @@ public class CategoryModel implements ICategoryModel {
         }
     }
 
+    public String getOneCategoryNameByID(int categoryID) {
+        try {
+            return categoriesDBConnection.getOneCategoryNameByID(categoryID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     public void insertCategories(ArrayList<String> categories) {
         try {
             categoriesDBConnection.insertCategories(categories);

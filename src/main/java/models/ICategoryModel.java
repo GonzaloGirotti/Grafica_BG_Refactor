@@ -14,4 +14,5 @@ public interface ICategoryModel {
     void insertCategories(ArrayList<String> categoriesNames);
     int getCategoryID(String categoryName);
     boolean categoriesAlreadyInserted();
+    String getOneCategoryNameByID(int categoryID);
 }

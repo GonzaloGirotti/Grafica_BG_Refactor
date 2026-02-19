@@ -3,6 +3,7 @@ package utils.databases;
 import utils.Budget;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BudgetsDatabaseConnection extends DatabaseConnection{
 
@@ -153,8 +154,8 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         conn.close();
     }
 
-    public void saveProducts(int budgetID, ArrayList<Integer> productAmounts, ArrayList<String> productNames, ArrayList<String> productObservations,
-                             ArrayList<String> productMeasures, ArrayList<Double> productPrices) throws SQLException {
+    public void saveProducts(int budgetID, List<Integer> productAmounts, List<String> productNames, List<String> productObservations,
+                             List<String> productMeasures, List<Double> productPrices) throws SQLException {
         int iterableIndex = 0;
 
         String sql = "INSERT INTO PRESUPUESTO_PRODUCTOS(ID_PRESUPUESTO, NOMBRE_PRODUCTO, CANTIDAD, OBSERVACIONES, MEDIDAS, PRECIO) VALUES(?, ?, ?, ?, ?, ?)";

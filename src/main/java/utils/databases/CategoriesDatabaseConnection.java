@@ -9,6 +9,22 @@ public class CategoriesDatabaseConnection extends DatabaseConnection {
 
     private static Logger LOGGER;
 
+    public String getOneCategoryNameByID(int categoryID) throws SQLException {
+        String sql = "SELECT Nombre FROM Categorias WHERE ID = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, categoryID);
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("Nombre");
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(null,"ERROR IN METHOD 'getOneCategoryNameByID' IN CLASS->'CategoriesDatabaseConnection'",e);
+        }
+        return "";
+    }
+
     @Override
     protected void createTable(Connection connection) {
         String categorySQL = "CREATE TABLE IF NOT EXISTS Categorias (" +
