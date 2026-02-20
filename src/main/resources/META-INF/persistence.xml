@@ -1,0 +1,22 @@
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="3.0"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+    <persistence-unit name="my-persistence-unit" transaction-type="RESOURCE_LOCAL">
+        <description>Project for learning Hibernate</description>
+
+        <!-- Persistence provider implementation -->
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Exclude unlisted classes -->
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+
+        <!-- Database connection properties -->
+        <properties>
+            <!-- Using sqlite driver -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlite:S:\Github Local Repositories\Grafica_BG_Refactor\GRAFICA_BAHIA_DATABASE.db"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>

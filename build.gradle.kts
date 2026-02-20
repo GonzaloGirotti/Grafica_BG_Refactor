@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version("8.1.1")
     id("application")
+    id("org.hibernate.orm") version "8.0.0.Alpha1"
 }
 
 group = "org.example"
