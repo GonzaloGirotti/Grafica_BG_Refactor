@@ -47,6 +47,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.miglayout:miglayout-swing:5.0")
+    implementation("org.hibernate.orm:hibernate-core:6.4.4.Final")
 }
 
 tasks.test {
