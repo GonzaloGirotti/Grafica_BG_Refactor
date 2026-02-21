@@ -12,6 +12,8 @@ import utils.WorkBudget;
 import utils.WorkBudgetData;
 import utils.databases.ClientsDatabaseConnection;
 import utils.databases.WorkBudgetsDatabaseConnection;
+import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -26,6 +28,7 @@ public class WorkBudgetModel {
 	private final List<WorkBudgetCreationFailureListener> workBudgetCreationFailureListeners;
 
 	private final ClientsDatabaseConnection clientsDBConnection;
+	private final ClientesDBConnection clientesConnection;
 	private final WorkBudgetsDatabaseConnection budgetsDBConnection;
 	private static Logger LOGGER;
 
@@ -39,9 +42,11 @@ public class WorkBudgetModel {
 
 
 	public WorkBudgetModel(ClientsDatabaseConnection clientsDBConnection,
-						   WorkBudgetsDatabaseConnection budgetsDBConnection) {
+						   WorkBudgetsDatabaseConnection budgetsDBConnection,
+						   ClientesDBConnection clientesConnection) {
 		this.clientsDBConnection = clientsDBConnection;
 		this.budgetsDBConnection = budgetsDBConnection;
+		this.clientesConnection = clientesConnection;
 
 		this.workBudgetCreationSuccessListeners = new ArrayList<>();
 		this.workBudgetCreationFailureListeners = new ArrayList<>();
@@ -54,16 +59,16 @@ public class WorkBudgetModel {
 
 	public ArrayList<String> getCitiesName() {
 		try {
-			return clientsDBConnection.getCities();
+			return clientesConnection.getCities();
 		} catch (Exception e) {
 			LOGGER.log(null, "Error getting cities");
 		}
 		return new ArrayList<>();
 	}
 
-	public ArrayList<Client> getClients(String name, String city) {
+	public ArrayList<Clientes> getClients(String name, String city) {
 		try {
-			return clientsDBConnection.getClientsFromNameAndCity(name, city);
+			return clientesConnection.searchClientsByNameAndCity(name, city);
 		} catch (Exception e) {
 			LOGGER.log(null, "Error getting clients");
 		}
@@ -72,16 +77,16 @@ public class WorkBudgetModel {
 
 	public int getClientID(String name, String clientType) {
 		try {
-			return clientsDBConnection.getClientID(name, clientType);
+			return clientesConnection.getClientID(name, clientType);
 		} catch (Exception e) {
 			LOGGER.log(null, "Error getting client ID");
 		}
 		return -1;
 	}
 
-	public Client getClientByID(int clientID) {
+	public Clientes getClientByID(int clientID) {
 		try {
-			Client client = clientsDBConnection.getOneClient(clientID);
+			Clientes client = clientesConnection.getOneClient(clientID);
 			if (client != null) {
 				return client;
 			}

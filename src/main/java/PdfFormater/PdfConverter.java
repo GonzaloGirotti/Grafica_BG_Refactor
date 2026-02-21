@@ -6,6 +6,7 @@ import PdfFormater.codingerror.model.Product;
 import PdfFormater.codingerror.service.CodingErrorPdfInvoiceCreator;
 import com.itextpdf.layout.element.Paragraph;
 import utils.Client;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.awt.*;
 import java.io.File;
@@ -19,7 +20,7 @@ import java.util.List;
 public class PdfConverter implements IPdfConverter{
     public PdfConverter(){}
     @Override
-    public void generateBill(boolean isPreview, Client client, int billNumber, ArrayList<Row> tableContent, double total) throws FileNotFoundException {
+    public void generateBill(boolean isPreview, Clientes client, int billNumber, ArrayList<Row> tableContent, double total) throws FileNotFoundException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate ld = LocalDate.now();
         String formattedDate = ld.format(formatter);
@@ -31,13 +32,19 @@ public class PdfConverter implements IPdfConverter{
         if(isPreview){
             pdfName = "temp_preview.pdf";
         }else {
-            pdfName = client.getName() +"_"+ parsedDate + "_" + billNumber + ".pdf";
+            pdfName = client.getNombre() +"_"+ parsedDate + "_" + billNumber + ".pdf";
         }
 
         String imagePath="src/main/resources/BGLogo.png"; // Path to your logo image
 
         CodingErrorPdfInvoiceCreator cepdf =new CodingErrorPdfInvoiceCreator(pdfName);
-        String finalPath = cepdf.createDocument();
+        String finalPath = "";
+
+        try{
+            finalPath = cepdf.createDocument();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         //Create Header start
         HeaderDetails header=new HeaderDetails();
@@ -55,13 +62,13 @@ public class PdfConverter implements IPdfConverter{
         addressDetails
                 .setBillingInfoText("Cliente")
                 .setBillingCompanyText("Nombre")
-                .setBillingCompany(client.getName())
+                .setBillingCompany(client.getNombre())
                 .setBillingNameText("Dirección")
-                .setBillingName(client.getAddress())
+                .setBillingName(client.getDireccion())
                 .setBillingAddressText("Localidad")
-                .setBillingAddress(client.getCity())
+                .setBillingAddress(client.getLocalidad())
                 .setBillingEmailText("Teléfono")
-                .setBillingEmail(client.getPhone())
+                .setBillingEmail(client.getTelefono())
                 //.setShippingName("Customer Name \n")
                 .setShippingInfoText("")
                 .setShippingNameText("")

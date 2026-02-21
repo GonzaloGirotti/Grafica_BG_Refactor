@@ -19,6 +19,8 @@ import org.javatuples.Pair;
 import utils.PDFOpener;
 import utils.TextUtils;
 import utils.databases.ClientsDatabaseConnection;
+import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +33,7 @@ public class WorkBudgetPDFConverter {
     private static PdfFont ARIAL_FONT;
     private static PdfFont TAHOMA_FONT;
     private static final TextUtils textUtils = new TextUtils();
-    private static final ClientsDatabaseConnection clientsDB = new ClientsDatabaseConnection();
+    private static final ClientesDBConnection clientsDB = new ClientesDBConnection();
     private static PDFOpener pdfOpener = new PDFOpener();
     private int copyCounter = 1;
 
@@ -57,7 +59,17 @@ public class WorkBudgetPDFConverter {
     }
 
     private String getClientName(int clientID) {
-        return clientsDB.getClientNameByID(clientID);
+        try {
+            Clientes cliente = clientsDB.getOneClient(clientID);
+            if(cliente != null){
+                return cliente.getNombre();
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println("Error fetching client name for ID: " + clientID);
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public void generateWorkBill(boolean modified, int billNumber,  int clientID, ArrayList<Pair<String,String>> strMaterials, Pair<String,String> logistics, ArrayList<Pair<String,String>> placers,

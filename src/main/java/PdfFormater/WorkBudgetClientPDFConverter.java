@@ -9,6 +9,7 @@ import utils.Client;
 import utils.NewProduct;
 import utils.PDFOpener;
 import utils.TextUtils;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.awt.*;
 import java.io.File;
@@ -30,7 +31,7 @@ public class WorkBudgetClientPDFConverter {
     String pdfName = "job_budget_client.pdf";
 */
 
-    public void generateBill(Client client, int billNumber, ArrayList<String> baseTableContent, String budgetTotal, Pair<String, String> depositAndBalance) throws FileNotFoundException {
+    public void generateBill(Clientes client, int billNumber, ArrayList<String> baseTableContent, String budgetTotal, Pair<String, String> depositAndBalance) throws FileNotFoundException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         DateTimeFormatter fileFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -39,11 +40,11 @@ public class WorkBudgetClientPDFConverter {
         String formattedDate = ld.format(formatter);
         String fileFormattedDate = ld.format(fileFormatter);
 
-        String pdfName = "p_cliente_" + billNumber + "_" + client.getName() +"_"+ fileFormattedDate + ".pdf";
+        String pdfName = "p_cliente_" + billNumber + "_" + client.getNombre() +"_"+ fileFormattedDate + ".pdf";
 
         String imagePath="src/main/resources/BGLogo.png"; // Path to your logo image
         CodingErrorPdfInvoiceCreator cepdf =new CodingErrorPdfInvoiceCreator(pdfName);
-        cepdf.createClientWorkDocument(client.getName(), fileFormattedDate, billNumber);
+        cepdf.createClientWorkDocument(client.getNombre(), fileFormattedDate, billNumber);
 
         //Create Header start
         HeaderDetails header=new HeaderDetails();
@@ -61,13 +62,13 @@ public class WorkBudgetClientPDFConverter {
         addressDetails
                 .setBillingInfoText("Cliente")
                 .setBillingCompanyText("Nombre")
-                .setBillingCompany(client.getName())
+                .setBillingCompany(client.getNombre())
                 .setBillingNameText("Dirección")
-                .setBillingName(client.getAddress())
+                .setBillingName(client.getDireccion())
                 .setBillingAddressText("Localidad")
-                .setBillingAddress(client.getCity())
+                .setBillingAddress(client.getTipoCliente())
                 .setBillingEmailText("Teléfono")
-                .setBillingEmail(client.getPhone())
+                .setBillingEmail(client.getTelefono())
                 .setShippingInfoText("")
                 .setShippingNameText("")
                 .setShippingAddressText("")
@@ -98,6 +99,6 @@ public class WorkBudgetClientPDFConverter {
         // Term and condition end
 
         String folderDir = "/Presupuestos_Trabajo_Clientes_PDF/";
-        pdfOpener.openPDF(false, true, folderDir, billNumber, client.getName(), fileFormattedDate);
+        pdfOpener.openPDF(false, true, folderDir, billNumber, client.getNombre(), fileFormattedDate);
     }
 }

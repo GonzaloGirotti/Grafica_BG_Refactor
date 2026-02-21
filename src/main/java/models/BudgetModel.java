@@ -2,6 +2,8 @@ package models;
 
 import java.util.*;
 
+import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
@@ -30,6 +32,7 @@ public class BudgetModel implements IBudgetModel {
     private final BudgetsDatabaseConnection budgetsDBConnection;
     private final ProductsDatabaseConnection productsDBConnection;
     private final ClientsDatabaseConnection clientsDBConnection;
+    private final ClientesDBConnection clientesConnection;
     private final PresupuestosDBConnection presupuestosDBConnection;
 
     // BUDGETS
@@ -41,7 +44,8 @@ public class BudgetModel implements IBudgetModel {
     public BudgetModel(BudgetsDatabaseConnection budgetsDBConnection,
                        PresupuestosDBConnection presupuestosDBConnection,
                        ProductsDatabaseConnection productsDBConnection,
-                       ClientsDatabaseConnection clientsDBConnection)
+                       ClientsDatabaseConnection clientsDBConnection,
+                       ClientesDBConnection clientesConnection)
     {
         // INITIALIZE LISTENERS
         this.budgetCreationSuccessListeners = new LinkedList<>();
@@ -54,6 +58,7 @@ public class BudgetModel implements IBudgetModel {
         this.productsDBConnection = productsDBConnection;
         this.clientsDBConnection = clientsDBConnection;
         this.presupuestosDBConnection = presupuestosDBConnection;
+        this.clientesConnection = clientesConnection;
     }
 
 
@@ -123,9 +128,9 @@ public class BudgetModel implements IBudgetModel {
 
     // GET CLIENTS
     @Override
-    public ArrayList<Client> getClients(String name, String city) {
+    public ArrayList<Clientes> getClients(String name, String city) {
         try {
-            return clientsDBConnection.getClientsFromNameAndCity(name, city);
+            return clientesConnection.searchClientsByNameAndCity(name, city);
         } catch (Exception e) {
             logger.error("Error getting clients: {}", e.getMessage(), e);
         }
@@ -136,16 +141,16 @@ public class BudgetModel implements IBudgetModel {
     // GET CLIENT ID
     public int getClientID(String clientName, String clientType) {
         try {
-            return clientsDBConnection.getClientID(clientName, clientType);
+            return clientesConnection.getClientID(clientName, clientType);
         } catch (Exception e) {
             logger.error("Error getting client ID: {}", e.getMessage(), e);
         }
         return -1;
     }
 
-    public Client getClientByID(int clientID) {
+    public Clientes getClientByID(int clientID) {
         try {
-            return clientsDBConnection.getOneClient(clientID);
+            return clientesConnection.getOneClient(clientID);
         } catch (Exception e) {
             logger.error("Error getting client by ID: {}", e.getMessage(), e);
         }
@@ -258,7 +263,7 @@ public class BudgetModel implements IBudgetModel {
     @Override
     public ArrayList<String> getCitiesName() {
         try {
-            return clientsDBConnection.getCities();
+            return clientesConnection.getCities();
         } catch (Exception e) {
             logger.error("Error getting cities: {}", e.getMessage(), e);
         }
@@ -294,9 +299,9 @@ public class BudgetModel implements IBudgetModel {
     }
 
 
-    public Client GetOneClientByID(int clientID) {
+    public Clientes GetOneClientByID(int clientID) {
         try {
-            return clientsDBConnection.getOneClient(clientID);
+            return clientesConnection.getOneClient(clientID);
         } catch (Exception e) {
             logger.error("Error getting one client: {}", e.getMessage(), e);
         }

@@ -5,6 +5,7 @@ import static utils.MessageTypes.*;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.Presupuestos;
 import models.IBudgetModel;
 import models.IBudgetModifyModel;
@@ -57,14 +58,14 @@ public class BudgetSearchPresenter extends StandardPresenter {
     }
 
     public void onPDFButtonClicked(int budgetNumber) {
-        Client client = getSelectedBudgetClient();
-        ArrayList<String> productNames = getSavedProductNames(budgetNumber, client.getName());
-        ArrayList<Integer> productAmounts = getSavedProductAmounts(budgetNumber, client.getName());
-        ArrayList<String> productObservations = budgetModifyModel.getProductObservations(budgetNumber, client.getName());
-        ArrayList<String> productMeasures = budgetModifyModel.getProductMeasures(budgetNumber, client.getName());
-        ArrayList<Double> productPrices = budgetModifyModel.getProductPrices(budgetNumber, client.getName());
+        Clientes client = getSelectedBudgetClient();
+        ArrayList<String> productNames = getSavedProductNames(budgetNumber, client.getNombre());
+        ArrayList<Integer> productAmounts = getSavedProductAmounts(budgetNumber, client.getNombre());
+        ArrayList<String> productObservations = budgetModifyModel.getProductObservations(budgetNumber, client.getNombre());
+        ArrayList<String> productMeasures = budgetModifyModel.getProductMeasures(budgetNumber, client.getNombre());
+        ArrayList<Double> productPrices = budgetModifyModel.getProductPrices(budgetNumber, client.getNombre());
         ArrayList<Row> tableContent = new ArrayList<>();
-        double globalBudgetTotalPrice = budgetModel.getBudgetTotalPrice(budgetModel.getBudgetID(budgetNumber, client.getName()));
+        double globalBudgetTotalPrice = budgetModel.getBudgetTotalPrice(budgetModel.getBudgetID(budgetNumber, client.getNombre()));
 
         for (int i = 0; i < productNames.size(); i++) {
             Row row = new Row(productNames.get(i), productAmounts.get(i), productMeasures.get(i), productObservations.get(i), productPrices.get(i), globalBudgetTotalPrice);
@@ -88,7 +89,7 @@ public class BudgetSearchPresenter extends StandardPresenter {
     }
 
 
-    public Client getSelectedBudgetClient() {
+    public Clientes getSelectedBudgetClient() {
         String selectedBudgetName = budgetSearchView.getSelectedBudgetName();
         String selectedBudgetClientType = budgetSearchView.getSelectedBudgetClientType();
         int clientID = budgetModel.getClientID(selectedBudgetName, selectedBudgetClientType);

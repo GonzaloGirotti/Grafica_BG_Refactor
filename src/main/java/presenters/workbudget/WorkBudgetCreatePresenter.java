@@ -9,6 +9,7 @@ import presenters.StandardPresenter;
 import utils.Client;
 import utils.MessageTypes;
 import utils.WorkBudgetData;
+import utils.databases.hibernate.entities.Clientes;
 import views.workbudget.WorkBudgetCreateView;
 import views.workbudget.stages.*;
 
@@ -326,7 +327,6 @@ public class WorkBudgetCreatePresenter extends StandardPresenter {
 
 	public void onSearchClientButtonClicked(ClientSearchingStage clientSearchingStage) {
 		String city = "";
-		String clientType = "";
 		city = (String) clientSearchingStage.getSelectedCity();
 		String name = clientSearchingStage.getClientNameInput();
 		int clientID = -1;
@@ -335,27 +335,21 @@ public class WorkBudgetCreatePresenter extends StandardPresenter {
 			city = "";
 		}
 
-		ArrayList<Client> clients = workBudgetModel.getClients(name, city); // LOCAL VARIABLE -> GET CLIENTS BY NAME AND CITY
+		ArrayList<Clientes> clients = workBudgetModel.getClients(name, city); // LOCAL VARIABLE -> GET CLIENTS BY NAME AND CITY
 		clientSearchingStage.clearClientTable(); // CLEAR CLIENT TABLE
 		int rowCount = 0; // ROW COUNT VARIABLE
 
 		// LOOP THROUGH CLIENTS
-		for (Client client : clients) {
-			clientType = "Cliente";
-
-			if (!client.isClient()) {
-				clientType = "Particular";
-			}
-
-			clientID = workBudgetModel.getClientID(client.getName(), clientType); // GET CLIENT ID
+		for (Clientes client : clients) {
+			clientID = workBudgetModel.getClientID(client.getNombre(), client.getTipoCliente()); // GET CLIENT ID
 
 			// SET CLIENT TABLE VALUES
 			clientSearchingStage.setClientIntTableValueAt(rowCount, 0, clientID);
-			clientSearchingStage.setClientStringTableValueAt(rowCount, 1, client.getName());
-			clientSearchingStage.setClientStringTableValueAt(rowCount, 2, client.getAddress());
-			clientSearchingStage.setClientStringTableValueAt(rowCount, 3, client.getCity());
-			clientSearchingStage.setClientStringTableValueAt(rowCount, 4, client.getPhone());
-			clientSearchingStage.setClientStringTableValueAt(rowCount, 5, client.isClient() ? "Cliente" : "Particular");
+			clientSearchingStage.setClientStringTableValueAt(rowCount, 1, client.getNombre());
+			clientSearchingStage.setClientStringTableValueAt(rowCount, 2, client.getDireccion());
+			clientSearchingStage.setClientStringTableValueAt(rowCount, 3, client.getLocalidad());
+			clientSearchingStage.setClientStringTableValueAt(rowCount, 4, client.getTelefono());
+			clientSearchingStage.setClientStringTableValueAt(rowCount, 5, client.getTipoCliente());
 			rowCount++; // INCREMENT ROW COUNT
 		}
 	}
@@ -370,12 +364,12 @@ public class WorkBudgetCreatePresenter extends StandardPresenter {
 		ClientSearchingStage clientSearchingStage = workBudgetCreateView.getClientSearchingStage();
 		clientSearchingStage.setClientIntTableValueAt(0,0, clientID);
 
-		Client client = workBudgetModel.getClientByID(clientID);
-		clientSearchingStage.setClientStringTableValueAt(0,1,client.getName());
-		clientSearchingStage.setClientStringTableValueAt(0,2,client.getAddress());
-		clientSearchingStage.setClientStringTableValueAt(0,3,client.getCity());
-		clientSearchingStage.setClientStringTableValueAt(0,4,client.getPhone());
-		clientSearchingStage.setClientStringTableValueAt(0,5, client.isClient() ? "Cliente" : "Particular");
+		Clientes client = workBudgetModel.getClientByID(clientID);
+		clientSearchingStage.setClientStringTableValueAt(0,1,client.getNombre());
+		clientSearchingStage.setClientStringTableValueAt(0,2,client.getDireccion());
+		clientSearchingStage.setClientStringTableValueAt(0,3,client.getLocalidad());
+		clientSearchingStage.setClientStringTableValueAt(0,4,client.getTelefono());
+		clientSearchingStage.setClientStringTableValueAt(0,5, client.getTipoCliente());
 		clientSearchingStage.selectRow(0);
 
 		workBudgetCreateView.setLogisticsData(data.getLogistics(), data.getLogisticsCost());

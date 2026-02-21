@@ -24,6 +24,7 @@ import presenters.workbudget.WorkBudgetCreatePresenter;
 import presenters.workbudget.WorkBudgetSearchPresenter;
 import testing.entities.Presupuestos;
 import utils.databases.*;
+import utils.databases.hibernate.ClientesDBConnection;
 import utils.databases.hibernate.PresupuestosDBConnection;
 import views.budget.BudgetCreateView;
 import views.budget.BudgetSearchView;
@@ -52,6 +53,7 @@ public class Main {
         Locale.setDefault(Locale.US);
 
         PresupuestosDBConnection presupuestosDBConnection = new PresupuestosDBConnection();
+        ClientesDBConnection  clientesDBConnection = new ClientesDBConnection();
         CategoriesDatabaseConnection categoriesDB = new CategoriesDatabaseConnection();
         categoriesDB.loadDatabase();
         ClientsDatabaseConnection clientsDB = new ClientsDatabaseConnection();
@@ -71,17 +73,17 @@ public class Main {
         BudgetProductsDatabaseConnection budgetProductsDB = new BudgetProductsDatabaseConnection();
         budgetProductsDB.loadDatabase();
 
-        IClientModel clientModel = new ClientModel(clientsDB);
+        IClientModel clientModel = new ClientModel(clientsDB, clientesDBConnection);
         IProductModel productModel = new ProductModel(productsDB, attributesDB, categoriesDB);
-        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, clientsDB);
+        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, clientsDB, clientesDBConnection);
         ICategoryModel categoryModel = new CategoryModel(categoriesDB);
         IProductListModel productListModel = new ProductListModel(productsDB);
-        IClientListModel clientListModel = new ClientListModel(clientsDB);
+        IClientListModel clientListModel = new ClientListModel(clientesDBConnection);
         IBudgetListModel budgetListModel = new BudgetListModel(budgetsDB);
         IBudgetModifyModel budgetModifyModel = new BudgetModifyModel(budgetsDB);
         ISettingsModel settingsModel = new SettingsModel(settingsDB);
         IBudgetHistoryModel budgetHistoryModel = new BudgetHistoryModel(budgetsDB, clientsDB);
-        WorkBudgetModel workBudgetModel = new WorkBudgetModel(clientsDB, workBudgetsDB);
+        WorkBudgetModel workBudgetModel = new WorkBudgetModel(clientsDB, workBudgetsDB, clientesDBConnection);
 
 
         ClientCreateView clientCreateView = new ClientCreateView();

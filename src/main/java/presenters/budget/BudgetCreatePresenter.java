@@ -5,6 +5,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
@@ -25,6 +26,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static utils.TextUtils.truncateAndRound;
@@ -41,10 +43,10 @@ public class BudgetCreatePresenter extends StandardPresenter {
     private final ICategoryModel categoryModel;
     private final ISettingsModel settingsModel;
     private static final IPdfConverter pdfConverter = new PdfConverter();
-    private static Logger LOGGER;
+    private static Logger LOGGER = Logger.getLogger(BudgetCreatePresenter.class.getName());
 
     double globalBudgetTotalPrice = 0.0;
-    private ArrayList<Client> globalClientsList;
+    private ArrayList<Clientes> globalClientsList;
     private int globalClientID = -1;
     private int productsRowCountOnPreviewTable = 0;
     private String globalClientType = "";
@@ -121,10 +123,12 @@ public class BudgetCreatePresenter extends StandardPresenter {
             }
 
             pricePair = product.calculateRealTimePrice(); // CALCULATE REAL TIME PRICE
-            Client client = budgetModel.getClientByID(globalClientID);
+            Clientes client = budgetModel.getClientByID(globalClientID);
+            String tipoCliente = "";
+            if(client != null){ tipoCliente = client.getTipoCliente();};
             budgetCreateView.setProductStringTableValueAt(rowCount, 0, product.getName()); // SET PRODUCT STRING TABLE VALUE AT ROW COUNT, 0, PRODUCT NAME
             budgetCreateView.setProductStringTableValueAt(rowCount, 1, productCategoryName); // SET PRODUCT STRING TABLE VALUE AT ROW COUNT, 2, PRODUCT CATEGORY NAME
-            budgetCreateView.setProductStringTableValueAt(rowCount, 2, client.isClient() ? String.valueOf(pricePair.getValue0()) : String.valueOf(pricePair.getValue1())); // SET PRODUCT STRING TABLE VALUE AT ROW COUNT, 3, PRODUCT PRICE
+            budgetCreateView.setProductStringTableValueAt(rowCount, 2, Objects.equals(tipoCliente, "Cliente") ? String.valueOf(pricePair.getValue0()) : String.valueOf(pricePair.getValue1())); // SET PRODUCT STRING TABLE VALUE AT ROW COUNT, 3, PRODUCT PRICE
             rowCount++; // INCREMENT ROW COUNT
         }
     }
@@ -144,9 +148,8 @@ public class BudgetCreatePresenter extends StandardPresenter {
     // IF THE SEARCH CLIENT BUTTON IS CLICKED:
     public void OnSearchClientButtonClicked() {
         String city = ""; // CITY STRING VARIABLE
-        String clientType = ""; // CLIENT TYPE STRING VARIABLE
         int clientID = -1; // CLIENT ID VARIABLE
-        ArrayList<Client> clients; // CLIENTS ARRAYLIST
+        ArrayList<Clientes> clients; // CLIENTS ARRAYLIST
 
         city = (String) budgetCreateView.getCitiesComboBox().getSelectedItem(); // GET CITY
         String name = budgetCreateView.getBudgetClientName(); // GET BUDGET CLIENT NAME
@@ -169,22 +172,17 @@ public class BudgetCreatePresenter extends StandardPresenter {
         int rowCount = 0; // ROW COUNT VARIABLE
 
         // LOOP THROUGH CLIENTS
-        for (Client client : clients) {
-            clientType = "Cliente";
+        for (Clientes client : clients) {
 
-            if (!client.isClient()) {
-                clientType = "Particular";
-            }
-
-            clientID = budgetModel.getClientID(client.getName(), clientType); // GET CLIENT ID
+            clientID = budgetModel.getClientID(client.getNombre(), client.getTipoCliente()); // GET CLIENT ID
 
             // SET CLIENT TABLE VALUES
             budgetCreateView.setClientIntTableValueAt(rowCount, 0, clientID);
-            budgetCreateView.setClientStringTableValueAt(rowCount, 1, client.getName());
-            budgetCreateView.setClientStringTableValueAt(rowCount, 2, client.getAddress());
-            budgetCreateView.setClientStringTableValueAt(rowCount, 3, client.getCity());
-            budgetCreateView.setClientStringTableValueAt(rowCount, 4, client.getPhone());
-            budgetCreateView.setClientStringTableValueAt(rowCount, 5, client.isClient() ? "Cliente" : "Particular");
+            budgetCreateView.setClientStringTableValueAt(rowCount, 1, client.getNombre());
+            budgetCreateView.setClientStringTableValueAt(rowCount, 2, client.getDireccion());
+            budgetCreateView.setClientStringTableValueAt(rowCount, 3, client.getLocalidad());
+            budgetCreateView.setClientStringTableValueAt(rowCount, 4, client.getTelefono());
+            budgetCreateView.setClientStringTableValueAt(rowCount, 5, client.getTipoCliente());
             rowCount++; // INCREMENT ROW COUNT
         }
     }
@@ -237,7 +235,7 @@ public class BudgetCreatePresenter extends StandardPresenter {
 
     public void onCreateButtonClicked() {
         List<String[]> budgetData = budgetCreateView.getPreviewTableFilledRowsData();
-        Client client;
+        Clientes client;
         ArrayList<Row> tableContent = new ArrayList<>();
 
         // BUDGET DATA LIST
@@ -284,8 +282,20 @@ public class BudgetCreatePresenter extends StandardPresenter {
 
             //PDF CREATION
             client = GetOneClientByID(budgetClientName, budgetClientType);
-            tableContent = getAllProductsFromPreviewTable(client.isClient());
-            GeneratePDF(client, tableContent, budgetNumber);
+            boolean isParticular = false;
+            if(client != null){
+                try {
+                    isParticular = !client.getTipoCliente().equals("Cliente");
+                    tableContent = getAllProductsFromPreviewTable(isParticular);
+                    GeneratePDF(client, tableContent, budgetNumber);
+                    LOGGER.log(Level.INFO, "PDF generated successfully for budget number: " + budgetNumber);
+                } catch(Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error generating PDF for budget number: " + budgetNumber, e);
+                }
+            } else {
+                LOGGER.log(Level.WARNING, "Client not found for PDF generation. Client name: " + budgetClientName + ", Type: " + budgetClientType);
+            }
+
 
 
             budgetCreateView.restartWindow(); // RESTART WINDOW
@@ -299,7 +309,7 @@ public class BudgetCreatePresenter extends StandardPresenter {
         budgetCreateView.setWaitingStatus();
     }
 
-    public void GeneratePDF(Client client, ArrayList<Row> tableContent, int budgetNumber) {
+    public void GeneratePDF(Clientes client, ArrayList<Row> tableContent, int budgetNumber) {
         try {
             pdfConverter.generateBill(false, client, budgetNumber, tableContent, globalBudgetTotalPrice);
         } catch (Exception e) {
@@ -472,9 +482,17 @@ public class BudgetCreatePresenter extends StandardPresenter {
         return productRowData;
     }
 
-    public Client GetOneClientByID(String clientName, String clientType) {
+    public Clientes GetOneClientByID(String clientName, String clientType) {
         int clientID = budgetModel.getClientID(clientName, clientType);
-        return budgetModel.GetOneClientByID(clientID);
+        if (clientID <= 0) {
+            LOGGER.log(Level.WARNING, "Client ID is invalid (" + clientID + "). Client not found in database. Client name: " + clientName + ", Type: " + clientType);
+            return null;
+        }
+        Clientes client = budgetModel.getClientByID(clientID);
+        if (client == null) {
+            LOGGER.log(Level.WARNING, "Client object is null despite having valid ID: " + clientID + ". Client name: " + clientName + ", Type: " + clientType);
+        }
+        return client;
     }
 
     public void increaseRowCountOnPreviewTable() {

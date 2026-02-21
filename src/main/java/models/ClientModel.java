@@ -10,6 +10,8 @@ import models.listeners.successful.ClientCreationSuccessListener;
 import models.listeners.failed.ClientCreationEmptyFieldListener;
 import utils.Client;
 import utils.databases.ClientsDatabaseConnection;
+import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ import java.util.List;
 public class ClientModel implements IClientModel{
 
 	private final ClientsDatabaseConnection dbConnection;
+	private final ClientesDBConnection cliConnection;
+
 	private final List<ClientCreationSuccessListener> clientCreationSuccessListeners;
 	private final List<ClientCreationFailureListener> clientCreationFailureListeners;
 	private final List<ClientSearchSuccessListener> clientSearchSuccessListeners;
@@ -29,13 +33,14 @@ public class ClientModel implements IClientModel{
 	private final List<CitiesFetchingSuccessListener> citiesFetchingSuccessListeners;
 	private final List<CitiesFetchingFailureListener> citiesFetchingFailureListeners;
 
-	private ArrayList<Client> clients;
+	private ArrayList<Clientes> clients;
 	private ArrayList<String> cities;
 	@Getter
     private String lastCityAdded;
 
-	public ClientModel(ClientsDatabaseConnection dbConnection) {
+	public ClientModel(ClientsDatabaseConnection dbConnection, ClientesDBConnection dbConnection2) {
 		this.dbConnection = dbConnection;
+		this.cliConnection = dbConnection2;
 		clients = new ArrayList<>();
 
 		this.clientCreationSuccessListeners = new LinkedList<>();
@@ -52,34 +57,40 @@ public class ClientModel implements IClientModel{
 	@Override
 	public void createClient(String clientName, String clientAddress, String clientCity, String clientPhone, boolean isClient) {
 		try {
-			dbConnection.insertClient(clientName, clientAddress, clientCity, clientPhone, isClient ? "Cliente" : "Particular");
+			Clientes cliente = new Clientes();
+			cliente.setNombre(clientName);
+			cliente.setDireccion(clientAddress);
+			cliente.setLocalidad(clientCity);
+			cliente.setTelefono(clientPhone);
+			cliente.setTipoCliente(isClient ? "Cliente" : "Particular");
+			cliConnection.saveCliente(cliente);
 			lastCityAdded = clientCity;
 			notifyClientCreationSuccess();
 		} catch (Exception e) {
 			notifyClientCreationFailure();
+			System.out.println(e);
 		}
 	}
 
 	public void queryClients(String clientName, String clientCity) {
 		try {
-			clients = dbConnection.getClientsFromNameAndCity(clientName, clientCity);
-			
+			clients = cliConnection.searchClientsByNameAndCity(clientName, clientCity);
 			notifyClientSearchSuccess();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			notifyClientSearchFailure();
 		}
 	}
 	@Override
-	public ArrayList<Client> getLastClientsQuery() {
+	public ArrayList<Clientes> getLastClientsQuery() {
 		return clients;
 	}
 
 	@Override
 	public void queryCities() {
 		try {
-			cities = dbConnection.getCities();
+			cities = cliConnection.getCities();
 			notifyCitiesFetchingSuccess();
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			notifyCitiesFetchingFailure();
 		}
 	}
@@ -157,12 +168,12 @@ public class ClientModel implements IClientModel{
 
 	@Override
 	public void deleteOneClient(int clientID) {
-        dbConnection.deleteOneClient(clientID);
+        cliConnection.deleteOneClient(clientID);
     }
 
 	@Override
 	public int getClientID(String clientName, String clientType) {
-		return dbConnection.getClientID(clientName, clientType);
+		return cliConnection.getClientID(clientName, clientType);
 	}
 
 }

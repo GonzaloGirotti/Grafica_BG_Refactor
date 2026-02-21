@@ -3,6 +3,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
@@ -319,7 +320,7 @@ public class BudgetModifyPresenter extends StandardPresenter {
         saveProductsToModel(presupuesto, products);
 
         // Generar PDF y cerrar
-        Client client = budgetModel.GetOneClientByID(budgetModel.getClientID(clientName, clientType));
+        Clientes client = budgetModel.GetOneClientByID(budgetModel.getClientID(clientName, clientType));
         GeneratePDF(client, products, globalBudgetNumber, finalTotal);
 
         budgetModifyView.showMessage(BUDGET_MODIFY_SUCCESS);
@@ -347,7 +348,7 @@ public class BudgetModifyPresenter extends StandardPresenter {
         );
     }
 
-    private void GeneratePDF(Client client, List<BudgetProduct> products, int num, double total) {
+    private void GeneratePDF(Clientes client, List<BudgetProduct> products, int num, double total) {
         ArrayList<Row> pdfRows = new ArrayList<>();
         products.forEach(p -> pdfRows.add(new Row(p.name(), p.amount(), p.measures(), p.obs(), p.price(), p.getTotalLine())));
         try {
@@ -387,22 +388,21 @@ public class BudgetModifyPresenter extends StandardPresenter {
         if ("Seleccione una ciudad".equals(city)) city = "";
 
         String name = budgetModifyView.getBudgetClientName();
-        ArrayList<Client> clients = budgetModel.getClients(name, city);
+        ArrayList<Clientes> clients = budgetModel.getClients(name, city);
 
         budgetModifyView.clearClientTable();
 
         for (int i = 0; i < clients.size(); i++) {
-            Client client = clients.get(i);
-            String clientType = client.isClient() ? "Cliente" : "Particular";
+            Clientes client = clients.get(i);
             // Obtenemos el ID real de la base de datos
-            int clientID = budgetModel.getClientID(client.getName(), clientType);
+            int clientID = budgetModel.getClientID(client.getNombre(), client.getTipoCliente());
 
             budgetModifyView.setClientIntTableValueAt(i, 0, clientID);
-            budgetModifyView.setClientStringTableValueAt(i, 1, client.getName());
-            budgetModifyView.setClientStringTableValueAt(i, 2, client.getAddress());
-            budgetModifyView.setClientStringTableValueAt(i, 3, client.getCity());
-            budgetModifyView.setClientStringTableValueAt(i, 4, client.getPhone());
-            budgetModifyView.setClientStringTableValueAt(i, 5, clientType);
+            budgetModifyView.setClientStringTableValueAt(i, 1, client.getNombre());
+            budgetModifyView.setClientStringTableValueAt(i, 2, client.getDireccion());
+            budgetModifyView.setClientStringTableValueAt(i, 3, client.getLocalidad());
+            budgetModifyView.setClientStringTableValueAt(i, 4, client.getTelefono());
+            budgetModifyView.setClientStringTableValueAt(i, 5, client.getTipoCliente());
         }
     }
 

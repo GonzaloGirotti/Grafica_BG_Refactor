@@ -1,4 +1,5 @@
 package models;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.Presupuestos;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
@@ -15,11 +16,11 @@ public interface IBudgetModel {
     void addBudgetSearchSuccessListener(BudgetSearchSuccessListener listener);
     void addBudgetSearchFailureListener(BudgetSearchFailureListener listener);
     double getBudgetTotalPrice(int budgetID);
-    Client GetOneClientByID(int clientID);
+    Clientes GetOneClientByID(int clientID);
     ArrayList<Product> getProducts(String productName, String productCategory);
-    ArrayList<Client> getClients(String name, String city);
+    ArrayList<Clientes> getClients(String name, String city);
     int getClientID(String clientName, String clientType);
-    Client getClientByID(int clientID);
+    Clientes getClientByID(int clientID);
     Presupuestos createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice);
     int getNextBudgetNumber();
     void saveProducts(Presupuestos presupuestos, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices);

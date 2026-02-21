@@ -8,6 +8,7 @@ import models.listeners.failed.ClientCreationFailureListener;
 import models.listeners.successful.CitiesFetchingSuccessListener;
 import models.listeners.successful.ClientCreationSuccessListener;
 import utils.Client;
+import utils.databases.hibernate.entities.Clientes;
 
 import java.util.ArrayList;
 
@@ -23,7 +24,7 @@ public interface IClientModel {
 
 	void queryClients(String searchedName, String searchedAddress);
 
-	ArrayList<Client> getLastClientsQuery();
+	ArrayList<Clientes> getLastClientsQuery();
 
 	void addCitiesFetchingSuccessListener(CitiesFetchingSuccessListener listener);
 

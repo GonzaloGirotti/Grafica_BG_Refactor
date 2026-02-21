@@ -4,6 +4,7 @@ import models.IClientModel;
 import presenters.StandardPresenter;
 import presenters.factory.IPresenterFactory;
 import utils.Client;
+import utils.databases.hibernate.entities.Clientes;
 import views.client.IClientSearchView;
 
 import java.util.ArrayList;
@@ -42,14 +43,14 @@ public class ClientSearchPresenter extends StandardPresenter {
         clientModel.addClientCreationSuccessListener(() -> addCityIfNotExists(clientModel.getLastCityAdded()));
     }
 
-    private void updateClientTable(ArrayList<Client> clients) {
+    private void updateClientTable(ArrayList<Clientes> clientes) {
         int rowCount = 0;
-        for (Client client : clients) {
-            clientSearchView.setTableValueAt(rowCount, 0, client.getName());
-            clientSearchView.setTableValueAt(rowCount, 1, client.getAddress());
-            clientSearchView.setTableValueAt(rowCount, 2, client.getCity());
-            clientSearchView.setTableValueAt(rowCount, 3, client.getPhone());
-            clientSearchView.setTableValueAt(rowCount, 4, client.isClient() ? "Cliente" : "Particular");
+        for (Clientes cliente : clientes) {
+            clientSearchView.setTableValueAt(rowCount, 0, cliente.getNombre());
+            clientSearchView.setTableValueAt(rowCount, 1, cliente.getDireccion());
+            clientSearchView.setTableValueAt(rowCount, 2, cliente.getLocalidad());
+            clientSearchView.setTableValueAt(rowCount, 3, cliente.getTelefono());
+            clientSearchView.setTableValueAt(rowCount, 4, cliente.getTipoCliente());
             rowCount++;
         }
     }

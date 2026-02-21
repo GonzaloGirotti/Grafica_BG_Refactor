@@ -2,17 +2,20 @@ package models;
 
 import utils.Client;
 import utils.databases.ClientsDatabaseConnection;
+import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.entities.Clientes;
+
 import java.util.ArrayList;
 
 public class ClientListModel implements IClientListModel {
-    private final ClientsDatabaseConnection clientsDBConnection;
+    private final ClientesDBConnection clientsDBConnection;
 
-    public ClientListModel( ClientsDatabaseConnection clientsDBConnection) {
+    public ClientListModel(ClientesDBConnection clientsDBConnection) {
         this.clientsDBConnection = clientsDBConnection;
     }
 
     @Override
-    public ArrayList<Client> getClientsFromDB() {
-        return clientsDBConnection.getAllClients();
+    public ArrayList<Clientes> getClientsFromDB() {
+        return clientsDBConnection.getAllClientes();
     }
 }

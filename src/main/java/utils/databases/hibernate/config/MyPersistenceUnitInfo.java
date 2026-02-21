@@ -90,7 +90,8 @@ public class MyPersistenceUnitInfo implements PersistenceUnitInfo {
     public List<String> getManagedClassNames() {
         return List.of(
                 "utils.databases.hibernate.entities.Presupuestos",
-                "utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS"
+                "utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS",
+                "utils.databases.hibernate.entities.Clientes"
                 );
     }
 
