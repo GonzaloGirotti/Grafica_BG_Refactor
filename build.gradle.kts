@@ -48,7 +48,11 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.miglayout:miglayout-swing:5.0")
     implementation("org.hibernate.orm:hibernate-core:6.4.4.Final")
+    implementation("org.hibernate.orm:hibernate-community-dialects:6.2.7.Final")
+    implementation("com.zaxxer:HikariCP:7.0.2")
 }
+
+
 
 tasks.test {
     useJUnitPlatform()

@@ -8,6 +8,9 @@
         <!-- Persistence provider implementation -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
+        <!-- Entity classes -->
+        <class>testing.entities.Student</class>
+
         <!-- Exclude unlisted classes -->
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
@@ -16,6 +19,9 @@
             <!-- Using sqlite driver -->
             <property name="jakarta.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlite:S:\Github Local Repositories\Grafica_BG_Refactor\GRAFICA_BAHIA_DATABASE.db"/>
+            <property name="jakarta.persistence.jdbc.user" value=""/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+            <property name="hibernate.dialect" value="org.hibernate.community.dialect.SQLiteDialect"/>
         </properties>
 
     </persistence-unit>

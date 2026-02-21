@@ -2,17 +2,24 @@ package models;
 
 import java.util.*;
 
+import entities.PRESUPUESTO_PRODUCTOS;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
+import entities.Presupuestos;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.Budget;
 import utils.Client;
 import utils.Product;
 import utils.databases.BudgetsDatabaseConnection;
 import utils.databases.ClientsDatabaseConnection;
 import utils.databases.ProductsDatabaseConnection;
+import utils.databases.hibernate.PresupuestosDBConnection;
 
 
 public class BudgetModel implements IBudgetModel {
+    private static final Logger logger = LoggerFactory.getLogger(BudgetModel.class);
+
     // LISTENERS FOR BUDGET CREATION SUCCESS AND FAILURE
     private final List<BudgetCreationSuccessListener> budgetCreationSuccessListeners;
     private final List<BudgetCreationFailureListener> budgetCreationFailureListeners;
@@ -23,6 +30,7 @@ public class BudgetModel implements IBudgetModel {
     private final BudgetsDatabaseConnection budgetsDBConnection;
     private final ProductsDatabaseConnection productsDBConnection;
     private final ClientsDatabaseConnection clientsDBConnection;
+    private final PresupuestosDBConnection presupuestosDBConnection;
 
     // BUDGETS
     private ArrayList<Budget> budgets;
@@ -31,6 +39,7 @@ public class BudgetModel implements IBudgetModel {
 
     // CONSTRUCTOR
     public BudgetModel(BudgetsDatabaseConnection budgetsDBConnection,
+                       PresupuestosDBConnection presupuestosDBConnection,
                        ProductsDatabaseConnection productsDBConnection,
                        ClientsDatabaseConnection clientsDBConnection)
     {
@@ -44,6 +53,7 @@ public class BudgetModel implements IBudgetModel {
         this.budgetsDBConnection = budgetsDBConnection;
         this.productsDBConnection = productsDBConnection;
         this.clientsDBConnection = clientsDBConnection;
+        this.presupuestosDBConnection = presupuestosDBConnection;
     }
 
 
@@ -98,7 +108,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return productsDBConnection.getProducts(productName, productCategory);
         } catch (Exception e) {
-            System.out.println("Error getting products");
+            logger.error("Error getting products: {}", e.getMessage(), e);
         }
         return new ArrayList<>();
     }
@@ -110,7 +120,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return clientsDBConnection.getClientsFromNameAndCity(name, city);
         } catch (Exception e) {
-            System.out.println("Error getting clients");
+            logger.error("Error getting clients: {}", e.getMessage(), e);
         }
         return new ArrayList<>();
     }
@@ -121,7 +131,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return clientsDBConnection.getClientID(clientName, clientType);
         } catch (Exception e) {
-            System.out.println("Error getting client ID");
+            logger.error("Error getting client ID: {}", e.getMessage(), e);
         }
         return -1;
     }
@@ -130,7 +140,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return clientsDBConnection.getOneClient(clientID);
         } catch (Exception e) {
-            System.out.println("Error getting client by ID");
+            logger.error("Error getting client by ID: {}", e.getMessage(), e);
         }
         return null;
     }
@@ -139,19 +149,41 @@ public class BudgetModel implements IBudgetModel {
 
     //CREATE BUDGET:
     @Override
-    public void createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice) {
+    public Presupuestos createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice) {
+        logger.info("========================================");
+        logger.info("CREATING NEW BUDGET");
+        logger.info("Name: {}, Date: {}, Type: {}, Number: {}, Price: {}",
+            budgetName, budgetDate, budgetClientType, budgetNumber, finalPrice);
+        logger.info("========================================");
         try {
-            budgetsDBConnection.insertBudget(budgetName, budgetDate, budgetClientType, budgetNumber, finalPrice);
+            Presupuestos presupuestos = new Presupuestos();
+            presupuestos.setNombre_Cliente(budgetName);
+            presupuestos.setFecha(budgetDate);
+            presupuestos.setTipo_Cliente(budgetClientType);
+            presupuestos.setNumero_Presupuesto(budgetNumber);
+            presupuestos.setPrecio_Total(finalPrice);
+
+            presupuestosDBConnection.savePresupuesto(presupuestos);
+            //presupuestosDBConnection.close();
+            logger.info("Budget created successfully!");
+            return presupuestos;
         } catch (Exception e) {
+            logger.error("========================================");
+            logger.error("ERROR CREATING BUDGET");
+            logger.error("Exception type: {}", e.getClass().getName());
+            logger.error("Error message: {}", e.getMessage());
+            logger.error("Full stack trace:", e);
+            logger.error("========================================");
             notifyBudgetCreationFailure();
         }
+        return null;
     }
 
     public double getBudgetTotalPrice(int budgetID) {
         try {
             return budgetsDBConnection.getBudgetTotalPrice(budgetID);
         } catch (Exception e) {
-            System.out.println("Error getting budget total price");
+            logger.error("Error getting budget total price: {}", e.getMessage(), e);
         }
         return -1;
     }
@@ -162,19 +194,42 @@ public class BudgetModel implements IBudgetModel {
         try {
             return budgetsDBConnection.getNextBudgetNumber();
         } catch (Exception e) {
-            System.out.println("Error getting next budget number");
+            logger.error("Error getting next budget number: {}", e.getMessage(), e);
         }
         return -1;
     }
 
 
-
     //SAVE BUDGET PRODUCTS ON BUDGET_PRODUCTS TABLE:
-    public void saveProducts(int budgetID, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices) {
+    public void saveProducts(Presupuestos presupuesto, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices) {
+        logger.info("========================================");
+        logger.info("SAVING BUDGET PRODUCTS");
+        logger.info("Budget ID: {}, Number of products: {}", presupuesto.getId(), productNames.size());
+        logger.info("========================================");
         try {
-            budgetsDBConnection.saveProducts(budgetID, productAmounts, productNames, observations, productMeasures, productPrices);
+            for (int i = 0; i < productNames.size(); i++) {
+                logger.info("--- Saving product {} of {} ---", (i + 1), productNames.size());
+                PRESUPUESTO_PRODUCTOS presupuesto_productos = new PRESUPUESTO_PRODUCTOS();
+
+                presupuesto_productos.setPresupuesto(presupuesto);
+                presupuesto_productos.setNOMBRE_PRODUCTO(productNames.get(i));
+                presupuesto_productos.setCANTIDAD(productAmounts.get(i));
+                presupuesto_productos.setOBSERVACIONES(observations.get(i));
+                presupuesto_productos.setMEDIDAS(productMeasures.get(i));
+                presupuesto_productos.setPRECIO(productPrices.get(i));
+
+                presupuestosDBConnection.savePresupuestoProductos(presupuesto_productos);
+                logger.info("Product {} saved successfully", (i + 1));
+            }
+            logger.info("All products saved successfully!");
         } catch (Exception e) {
-            //LOGGER.log(null, "Error saving products");
+            logger.error("========================================");
+            logger.error("ERROR SAVING BUDGET PRODUCTS");
+            logger.error("Exception type: {}", e.getClass().getName());
+            logger.error("Error message: {}", e.getMessage());
+            logger.error("Full stack trace:", e);
+            logger.error("========================================");
+            notifyBudgetCreationFailure();
         }
     }
 
@@ -186,7 +241,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return budgetsDBConnection.getBudgetID(budgetName, budgetNumber);
         } catch (Exception e) {
-            System.out.println("Error getting budget ID");
+            logger.error("Error getting budget ID: {}", e.getMessage(), e);
         }
         return -1;
     }
@@ -198,7 +253,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return clientsDBConnection.getCities();
         } catch (Exception e) {
-            System.out.println("Error getting cities");
+            logger.error("Error getting cities: {}", e.getMessage(), e);
         }
         return new ArrayList<>();
     }
@@ -216,6 +271,7 @@ public class BudgetModel implements IBudgetModel {
             budgets = budgetsDBConnection.getBudgets(budgetSearch);
             notifyBudgetSearchSuccess();
         } catch (Exception e) {
+            logger.error("Error querying budgets: {}", e.getMessage(), e);
             notifyBudgetSearchFailure();
         }
     }
@@ -224,7 +280,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return budgetsDBConnection.getMaxBudgetID();
         } catch (Exception e) {
-            System.out.println("Error getting max budget ID");
+            logger.error("Error getting max budget ID: {}", e.getMessage(), e);
         }
         return -1;
     }
@@ -235,7 +291,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             budgetsDBConnection.deleteOneBudget(budgetID);
         } catch (Exception e) {
-            System.out.println("Error deleting budget");
+            logger.error("Error deleting budget: {}", e.getMessage(), e);
         }
     }
 
@@ -244,7 +300,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             return clientsDBConnection.getOneClient(clientID);
         } catch (Exception e) {
-            System.out.println("Error getting one client");
+            logger.error("Error getting one client: {}", e.getMessage(), e);
         }
         return null;
     }
@@ -255,7 +311,7 @@ public class BudgetModel implements IBudgetModel {
         try {
             budgetsDBConnection.deleteBudgetProducts(budgetID);
         } catch (Exception e) {
-            System.out.println("Error deleting budget products");
+            logger.error("Error deleting budget products: {}", e.getMessage(), e);
         }
     }
 

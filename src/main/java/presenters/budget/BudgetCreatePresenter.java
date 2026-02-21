@@ -5,6 +5,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
 import org.javatuples.Pair;
@@ -14,6 +15,7 @@ import presenters.StandardPresenter;
 import utils.*;
 
 //IMPORTS FROM VIEWS PACKAGE
+import utils.databases.hibernate.PresupuestosDBConnection;
 import views.budget.IBudgetCreateView;
 import views.budget.cuttingService.ICuttingServiceFormView;
 
@@ -271,12 +273,15 @@ public class BudgetCreatePresenter extends StandardPresenter {
             }
 
             // CREATE BUDGET
-            budgetModel.createBudget(budgetClientName, budgetDate, budgetClientType, budgetNumber, globalBudgetTotalPrice);
-            budgetCreateView.showMessage(MessageTypes.BUDGET_CREATION_SUCCESS);
-
-
-            budgetID = budgetModel.getBudgetID(budgetNumber, budgetClientName);
-            budgetModel.saveProducts(budgetID, productsAmount, productsName, productsObservations, productsMeasures, productsPrices);
+            try {
+                Presupuestos presupuesto = budgetModel.createBudget(budgetClientName, budgetDate, budgetClientType, budgetNumber, globalBudgetTotalPrice);
+                budgetModel.saveProducts(presupuesto, productsAmount, productsName, productsObservations, productsMeasures, productsPrices);
+                budgetCreateView.showMessage(MessageTypes.BUDGET_CREATION_SUCCESS);
+            } catch (Exception e) {
+                budgetCreateView.showMessage(MessageTypes.BUDGET_CREATION_FAILURE);
+                System.out.println(e.getMessage());
+                return;
+            }
 
             //PDF CREATION
             client = GetOneClientByID(budgetClientName, budgetClientType);

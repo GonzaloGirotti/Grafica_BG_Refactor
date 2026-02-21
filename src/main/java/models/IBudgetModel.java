@@ -1,4 +1,5 @@
 package models;
+import entities.Presupuestos;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
 import utils.Budget;
@@ -13,16 +14,15 @@ public interface IBudgetModel {
     void addBudgetCreationFailureListener(BudgetCreationFailureListener listener);
     void addBudgetSearchSuccessListener(BudgetSearchSuccessListener listener);
     void addBudgetSearchFailureListener(BudgetSearchFailureListener listener);
-
     double getBudgetTotalPrice(int budgetID);
     Client GetOneClientByID(int clientID);
     ArrayList<Product> getProducts(String productName, String productCategory);
     ArrayList<Client> getClients(String name, String city);
     int getClientID(String clientName, String clientType);
     Client getClientByID(int clientID);
-    void createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice);
+    Presupuestos createBudget(String budgetName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice);
     int getNextBudgetNumber();
-    void saveProducts(int budgetID, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices);
+    void saveProducts(Presupuestos presupuestos, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices);
     int getBudgetID(int budgetNumber, String budgetName);
     ArrayList<String> getCitiesName();
     ArrayList<Budget> getLastBudgetsQuery();

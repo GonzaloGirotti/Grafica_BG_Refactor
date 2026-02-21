@@ -22,7 +22,9 @@ import presenters.product.ProductSearchPresenter;
 import presenters.settings.SettingsPresenter;
 import presenters.workbudget.WorkBudgetCreatePresenter;
 import presenters.workbudget.WorkBudgetSearchPresenter;
+import testing.entities.Presupuestos;
 import utils.databases.*;
+import utils.databases.hibernate.PresupuestosDBConnection;
 import views.budget.BudgetCreateView;
 import views.budget.BudgetSearchView;
 import views.budget.list.BudgetListView;
@@ -49,6 +51,7 @@ public class Main {
         FlatLightLaf.setup();
         Locale.setDefault(Locale.US);
 
+        PresupuestosDBConnection presupuestosDBConnection = new PresupuestosDBConnection();
         CategoriesDatabaseConnection categoriesDB = new CategoriesDatabaseConnection();
         categoriesDB.loadDatabase();
         ClientsDatabaseConnection clientsDB = new ClientsDatabaseConnection();
@@ -70,7 +73,7 @@ public class Main {
 
         IClientModel clientModel = new ClientModel(clientsDB);
         IProductModel productModel = new ProductModel(productsDB, attributesDB, categoriesDB);
-        IBudgetModel budgetModel = new BudgetModel(budgetsDB, productsDB, clientsDB);
+        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, clientsDB);
         ICategoryModel categoryModel = new CategoryModel(categoriesDB);
         IProductListModel productListModel = new ProductListModel(productsDB);
         IClientListModel clientListModel = new ClientListModel(clientsDB);

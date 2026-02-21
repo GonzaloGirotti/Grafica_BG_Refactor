@@ -3,6 +3,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
 import presenters.StandardPresenter;
@@ -300,7 +301,7 @@ public class BudgetModifyPresenter extends StandardPresenter {
 
         List<BudgetProduct> products = IntStream.rangeClosed(1, productsRowCountOnPreviewTable)
                 .mapToObj(this::extractBudgetProductFromRow)
-                .toList();
+                .toList(); // Obtenemos la lista de productos directamente desde la tabla de previsualización, asumiendo que las filas están llenas y ordenadas.
 
         // Limpieza de presupuesto anterior
         int oldId = budgetModel.getBudgetID(globalBudgetNumber, oldClientName);
@@ -314,10 +315,8 @@ public class BudgetModifyPresenter extends StandardPresenter {
         double finalTotal = globalBudgetTotalPrice;
         if ("Particular".equals(clientType)) finalTotal *= 1.25;
 
-        budgetModel.createBudget(clientName, budgetModifyView.getBudgetDate(), clientType, globalBudgetNumber, finalTotal);
-        int newId = budgetModel.getMaxBudgetID();
-
-        saveProductsToModel(newId, products);
+        Presupuestos presupuesto = budgetModel.createBudget(clientName, budgetModifyView.getBudgetDate(), clientType, globalBudgetNumber, finalTotal);
+        saveProductsToModel(presupuesto, products);
 
         // Generar PDF y cerrar
         Client client = budgetModel.GetOneClientByID(budgetModel.getClientID(clientName, clientType));
@@ -337,9 +336,9 @@ public class BudgetModifyPresenter extends StandardPresenter {
         );
     }
 
-    private void saveProductsToModel(int budgetId, List<BudgetProduct> products) {
+    private void saveProductsToModel(Presupuestos presupuesto, List<BudgetProduct> products) {
         budgetModel.saveProducts(
-                budgetId,
+                presupuesto,
                 products.stream().map(BudgetProduct::amount).toList(),
                 products.stream().map(BudgetProduct::name).toList(),
                 products.stream().map(BudgetProduct::obs).toList(),
