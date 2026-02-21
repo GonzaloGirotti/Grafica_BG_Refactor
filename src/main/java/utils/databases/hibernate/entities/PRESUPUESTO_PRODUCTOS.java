@@ -1,4 +1,4 @@
-package entities;
+package utils.databases.hibernate.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "PRESUPUESTO_PRODUCTOS")
-@IdClass(entities.ComposedIDs.PRESUPUESTO_PRODUCTO_ID.class)
+@IdClass(utils.databases.hibernate.entities.ComposedIDs.PRESUPUESTO_PRODUCTO_ID.class)
 @Getter @Setter
 public class PRESUPUESTO_PRODUCTOS {
 

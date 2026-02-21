@@ -1,13 +1,13 @@
 package utils.databases.hibernate;
 
-import entities.PRESUPUESTO_PRODUCTOS;
+import utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import config.MyPersistenceUnitInfo;
-import entities.Presupuestos;
+import utils.databases.hibernate.config.MyPersistenceUnitInfo;
+import utils.databases.hibernate.entities.Presupuestos;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +81,34 @@ public class PresupuestosDBConnection {
             }
             throw e;
         }
+    }
+
+    public void deleteOneBudget(Presupuestos presupuesto) {
+        em.getTransaction().begin();
+        Presupuestos presupuestoToDelete = em.find(Presupuestos.class, presupuesto.getId());
+        if (presupuestoToDelete != null) {
+            em.remove(presupuestoToDelete);
+            logger.info("Presupuesto with ID {} deleted successfully", presupuesto.getId());
+        } else {
+            logger.warn("Presupuesto with ID {} not found for deletion", presupuesto.getId());
+        }
+        em.getTransaction().commit();
+    }
+
+    public Presupuestos findPresupuestoByID(int presupuestoID) {
+        Presupuestos presupuesto = em.find(Presupuestos.class, presupuestoID);
+        if (presupuesto != null) {
+            logger.info("Presupuesto found with ID {}: Cliente: {}, Fecha: {}, Tipo: {}, Numero: {}, Precio: {}",
+                presupuesto.getId(),
+                presupuesto.getNombre_Cliente(),
+                presupuesto.getFecha(),
+                presupuesto.getTipo_Cliente(),
+                presupuesto.getNumero_Presupuesto(),
+                presupuesto.getPrecio_Total());
+        } else {
+            logger.warn("No Presupuesto found with ID {}", presupuestoID);
+        }
+        return presupuesto;
     }
 
     public void close() {

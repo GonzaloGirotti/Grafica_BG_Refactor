@@ -5,6 +5,7 @@ import static utils.MessageTypes.*;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
+import utils.databases.hibernate.entities.Presupuestos;
 import models.IBudgetModel;
 import models.IBudgetModifyModel;
 import presenters.StandardPresenter;
@@ -121,8 +122,8 @@ public class BudgetSearchPresenter extends StandardPresenter {
             if(budgetTable.getValueAt(selectedRow, 0) != null && !budgetTable.getValueAt(selectedRow, 0).equals(""))
             {
                 int budgetID = getOneBudgetID();
-                budgetModel.deleteBudgetProducts(budgetID);
-                budgetModel.deleteOneBudget(budgetID);
+                Presupuestos presupuesto = budgetModel.findPresupuestoByID(budgetID);
+                budgetModel.deleteOneBudget(presupuesto);
                 budgetSearchView.showMessage(BUDGET_DELETE_SUCCESS);
                 budgetSearchView.clearTable();
                 budgetModel.queryBudgets("");

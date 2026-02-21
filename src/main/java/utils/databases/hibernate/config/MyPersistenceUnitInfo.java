@@ -1,4 +1,4 @@
-package config;
+package utils.databases.hibernate.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.FetchType;
@@ -89,8 +89,8 @@ public class MyPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public List<String> getManagedClassNames() {
         return List.of(
-                "entities.Presupuestos",
-                "entities.PRESUPUESTO_PRODUCTOS"
+                "utils.databases.hibernate.entities.Presupuestos",
+                "utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS"
                 );
     }
 

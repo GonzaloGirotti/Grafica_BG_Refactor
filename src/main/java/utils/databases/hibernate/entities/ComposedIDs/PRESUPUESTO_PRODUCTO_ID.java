@@ -1,4 +1,4 @@
-package entities.ComposedIDs;
+package utils.databases.hibernate.entities.ComposedIDs;
 
 import lombok.*;
 import java.io.Serializable;

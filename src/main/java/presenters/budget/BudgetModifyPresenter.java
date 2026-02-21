@@ -3,7 +3,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
-import entities.Presupuestos;
+import utils.databases.hibernate.entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
 import presenters.StandardPresenter;
@@ -305,8 +305,8 @@ public class BudgetModifyPresenter extends StandardPresenter {
 
         // Limpieza de presupuesto anterior
         int oldId = budgetModel.getBudgetID(globalBudgetNumber, oldClientName);
-        budgetModel.deleteOneBudget(oldId);
-        budgetModel.deleteBudgetProducts(oldId);
+        Presupuestos oldBudget = budgetModel.findPresupuestoByID(oldId);
+        budgetModel.deleteOneBudget(oldBudget);
 
         String clientName = budgetModifyView.getPreviewStringTableValueAt(0, 0);
         String clientType = budgetModifyView.getPreviewStringTableValueAt(0, 6);

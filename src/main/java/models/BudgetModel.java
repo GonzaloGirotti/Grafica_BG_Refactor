@@ -2,10 +2,10 @@ package models;
 
 import java.util.*;
 
-import entities.PRESUPUESTO_PRODUCTOS;
+import utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
-import entities.Presupuestos;
+import utils.databases.hibernate.entities.Presupuestos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.Budget;
@@ -101,7 +101,14 @@ public class BudgetModel implements IBudgetModel {
         }
     }
 
-
+    public Presupuestos findPresupuestoByID(int presupuestoID) {
+        try {
+            return presupuestosDBConnection.findPresupuestoByID(presupuestoID);
+        } catch (Exception e) {
+            logger.error("Error finding presupuesto by ID: {}", e.getMessage(), e);
+        }
+        return null;
+    }
 
     // GET PRODUCTS
     public ArrayList<Product> getProducts(String productName, String productCategory) {
@@ -276,20 +283,11 @@ public class BudgetModel implements IBudgetModel {
         }
     }
 
-    public int getMaxBudgetID() {
-        try {
-            return budgetsDBConnection.getMaxBudgetID();
-        } catch (Exception e) {
-            logger.error("Error getting max budget ID: {}", e.getMessage(), e);
-        }
-        return -1;
-    }
-
 
     @Override
-    public void deleteOneBudget(int budgetID) {
+    public void deleteOneBudget(Presupuestos presupuestos) {
         try {
-            budgetsDBConnection.deleteOneBudget(budgetID);
+            presupuestosDBConnection.deleteOneBudget(presupuestos);
         } catch (Exception e) {
             logger.error("Error deleting budget: {}", e.getMessage(), e);
         }
@@ -303,16 +301,6 @@ public class BudgetModel implements IBudgetModel {
             logger.error("Error getting one client: {}", e.getMessage(), e);
         }
         return null;
-    }
-
-
-
-    public void deleteBudgetProducts(int budgetID) {
-        try {
-            budgetsDBConnection.deleteBudgetProducts(budgetID);
-        } catch (Exception e) {
-            logger.error("Error deleting budget products: {}", e.getMessage(), e);
-        }
     }
 
     // ---------> METHODS AND FUNCTIONS END HERE <-------------

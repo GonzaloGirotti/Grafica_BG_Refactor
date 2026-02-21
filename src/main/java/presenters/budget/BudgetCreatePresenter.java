@@ -5,7 +5,7 @@ package presenters.budget;
 import PdfFormater.IPdfConverter;
 import PdfFormater.PdfConverter;
 import PdfFormater.Row;
-import entities.Presupuestos;
+import utils.databases.hibernate.entities.Presupuestos;
 import models.*;
 import models.settings.ISettingsModel;
 import org.javatuples.Pair;
@@ -15,7 +15,6 @@ import presenters.StandardPresenter;
 import utils.*;
 
 //IMPORTS FROM VIEWS PACKAGE
-import utils.databases.hibernate.PresupuestosDBConnection;
 import views.budget.IBudgetCreateView;
 import views.budget.cuttingService.ICuttingServiceFormView;
 

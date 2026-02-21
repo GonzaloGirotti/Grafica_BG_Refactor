@@ -26,22 +26,6 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         }
     }
 
-    public void insertBudget(String budgetClientName, String budgetDate, String budgetClientType, int budgetNumber, double finalPrice) throws SQLException{
-        String sql = "INSERT INTO Presupuestos(Nombre_Cliente, Fecha, Tipo_Cliente, Numero_presupuesto, Precio_Total) VALUES(?, ?, ?, ?, ?)";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-
-        pstmt.setString(1, budgetClientName);
-        pstmt.setString(2, budgetDate);
-        pstmt.setString(3, budgetClientType);
-        pstmt.setInt(4, budgetNumber);
-        pstmt.setDouble(5, finalPrice);
-        pstmt.executeUpdate();
-
-        pstmt.close();
-        conn.close();
-    }
-
     public double getBudgetTotalPrice(int budgetID){
         String sql = "SELECT Precio_Total FROM Presupuestos WHERE ID = ?";
         try (Connection conn = connect();
@@ -132,51 +116,6 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         return budgetID;
     }
 
-    public int getMaxBudgetID() {
-        String sql = "SELECT MAX(ID) FROM Presupuestos";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery(sql)) {
-            return resultSet.getInt(1);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return 0;
-    }
-
-    public void deleteOneBudget(int budgetID) throws SQLException {
-        String sql = "DELETE FROM Presupuestos WHERE ID = ?";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, budgetID);
-        pstmt.executeUpdate();
-        pstmt.close();
-        conn.close();
-    }
-
-    public void saveProducts(int budgetID, List<Integer> productAmounts, List<String> productNames, List<String> productObservations,
-                             List<String> productMeasures, List<Double> productPrices) throws SQLException {
-        int iterableIndex = 0;
-
-        String sql = "INSERT INTO PRESUPUESTO_PRODUCTOS(ID_PRESUPUESTO, NOMBRE_PRODUCTO, CANTIDAD, OBSERVACIONES, MEDIDAS, PRECIO) VALUES(?, ?, ?, ?, ?, ?)";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-
-        for (String prodName : productNames) {
-            pstmt.setInt(1, budgetID);
-            pstmt.setString(2, prodName);
-            pstmt.setInt(3, productAmounts.get(iterableIndex));
-            pstmt.setString(4, productObservations.get(iterableIndex));
-            pstmt.setString(5, productMeasures.get(iterableIndex));
-            pstmt.setDouble(6, productPrices.get(iterableIndex));
-
-            pstmt.executeUpdate();
-            iterableIndex++;
-        }
-        pstmt.close();
-        conn.close();
-    }
-
     public ArrayList<Integer> getSavedProductAmounts(String budgetName, int budgetNumber) throws SQLException {
         ArrayList<Integer> productAmounts = new ArrayList<>();
         String sql = "SELECT CANTIDAD FROM PRESUPUESTO_PRODUCTOS WHERE ID_PRESUPUESTO = ?";
@@ -257,17 +196,6 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         pstmt.close();
         conn.close();
         return prices;
-    }
-
-
-    public void deleteBudgetProducts(int budgetID) throws SQLException {
-        String sql = "DELETE FROM PRESUPUESTO_PRODUCTOS WHERE ID_PRESUPUESTO = ?";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, budgetID);
-        pstmt.executeUpdate();
-        pstmt.close();
-        conn.close();
     }
 
     public ArrayList<String> getSelectedBudgetData(int budgetNumber) {

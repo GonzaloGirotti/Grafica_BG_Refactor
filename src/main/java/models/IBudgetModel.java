@@ -1,5 +1,5 @@
 package models;
-import entities.Presupuestos;
+import utils.databases.hibernate.entities.Presupuestos;
 import models.listeners.failed.*;
 import models.listeners.successful.*;
 import utils.Budget;
@@ -27,7 +27,6 @@ public interface IBudgetModel {
     ArrayList<String> getCitiesName();
     ArrayList<Budget> getLastBudgetsQuery();
     void queryBudgets(String budgetSearch);
-    void deleteOneBudget(int budgetID);
-    void deleteBudgetProducts(int budgetID);
-    int getMaxBudgetID();
+    void deleteOneBudget(Presupuestos presupuesto);
+    Presupuestos findPresupuestoByID(int presupuestoID);
 }

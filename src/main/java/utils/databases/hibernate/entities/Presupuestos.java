@@ -1,9 +1,8 @@
-package entities;
+package utils.databases.hibernate.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import entities.PRESUPUESTO_PRODUCTOS;
 
 import java.util.ArrayList;
 import java.util.List;
