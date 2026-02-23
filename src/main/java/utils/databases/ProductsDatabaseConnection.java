@@ -27,30 +27,6 @@ public class ProductsDatabaseConnection extends DatabaseConnection {
         }
     }
 
-    public int insertProduct(String nombre, int categoriaID) {
-        int idGenerado = -1;
-        String sql = "INSERT INTO Productos(Nombre, Categoria_ID) VALUES(?, ?)";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, nombre);
-            pstmt.setInt(2, categoriaID);
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows > 0) {
-                // Intenta obtener las claves generadas (el ID del producto)
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        // Recupera el primer valor de las claves generadas, que es el ID del producto
-                        idGenerado = generatedKeys.getInt(1);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return idGenerado;
-    }
-
     public ArrayList<Product> getProducts(String searchText, String category) throws SQLException {
 
         String sql = "SELECT * FROM Productos WHERE (Nombre LIKE ?)";
@@ -111,21 +87,6 @@ public class ProductsDatabaseConnection extends DatabaseConnection {
                 System.out.println(e.getMessage());
             }
         }
-
-    public void deleteMultipleProductsFromDB(List<Integer> productIDs) throws SQLException {
-        for (int ID : productIDs) {
-            String sql = "DELETE FROM Productos WHERE ID = ?";
-            try (Connection conn = connect();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, ID);
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al eliminar uno o mas productos!", "Error", JOptionPane.ERROR_MESSAGE);
-                System.out.println(e.getMessage());
-            }
-        }
-        JOptionPane.showMessageDialog(null, "Productos eliminados con éxito!");
-    }
 
     public int getProductID(String product) throws SQLException {
         String sql = "SELECT ID FROM Productos WHERE Nombre = ?";

@@ -8,6 +8,7 @@ import org.javatuples.Pair;
 import utils.Attribute;
 import utils.CategoryParser;
 import utils.databases.SettingsTableNames;
+import utils.databases.hibernate.entities.Categorias;
 import views.products.IProductSearchView;
 import utils.Product;
 import views.products.modular.IModularCategoryView;
@@ -152,10 +153,11 @@ public class ProductSearchPresenter extends ProductPresenter {
 
             String selectedProductName = (String) productSearchView.getProductResultTable().getValueAt(selectedRow, 0);
             int categoryID = categoryModel.getCategoryID(englishCategory);
+            Categorias categoria = categoryModel.getOneCategory(categoryID);
             attributes = modularView.getAttributes();
 
             productModel.deleteOneProduct(productModel.getProductID(selectedProductName), true);
-            productModel.createProduct(selectedProductName, categoryID, true);
+            productModel.createProduct(selectedProductName, categoria, true);
             int newproductID = productModel.getProductID(selectedProductName);
 
             updateProductName(newproductID, newProductName);

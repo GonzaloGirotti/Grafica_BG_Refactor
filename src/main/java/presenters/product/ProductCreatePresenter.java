@@ -15,6 +15,7 @@ import java.util.List;
 import utils.Attribute;
 import utils.Category;
 import utils.databases.SettingsTableNames;
+import utils.databases.hibernate.entities.Categorias;
 import views.products.IProductCreateView;
 import views.products.modular.*;
 
@@ -76,7 +77,8 @@ public class ProductCreatePresenter extends ProductPresenter {
             }
         } else {
             String productName = productCreateView.getProductName();
-            int productID = productModel.createProduct(productName, categoryID, false);
+            Categorias categoria = categoryModel.getOneCategory(categoryID);
+            int productID = productModel.createProduct(productName, categoria, false);
             instancedAttribute = modularView.getAttributes();
             productModel.instantiateProductAttributes(productID, instancedAttribute, categoryID);
             idToReturn = productID;

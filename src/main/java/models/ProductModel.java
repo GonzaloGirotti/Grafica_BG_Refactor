@@ -9,6 +9,9 @@ import utils.Product;
 import utils.databases.AttributesDatabaseConnection;
 import utils.databases.CategoriesDatabaseConnection;
 import utils.databases.ProductsDatabaseConnection;
+import utils.databases.hibernate.ProductosDBConnection;
+import utils.databases.hibernate.entities.Categorias;
+import utils.databases.hibernate.entities.Productos;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,6 +23,7 @@ public class ProductModel implements IProductModel {
 
     private final AttributesDatabaseConnection attributesDBConnection;
     private final ProductsDatabaseConnection productsDBConnection;
+    private final ProductosDBConnection productosDBConnection;
     private final CategoriesDatabaseConnection categoriesDBConnection;
     private final List<ProductCreationSuccessListener> productCreationSuccessListeners;
     private final List<ProductCreationFailureListener> productCreationFailureListeners;
@@ -28,10 +32,12 @@ public class ProductModel implements IProductModel {
     private ArrayList<Product> products;
 
     public ProductModel(ProductsDatabaseConnection dbConnection,
+                        ProductosDBConnection productosDBConnection,
                         AttributesDatabaseConnection attributesDBConnection,
                         CategoriesDatabaseConnection categoriesDBConnection) {
 
         this.productsDBConnection = dbConnection;
+        this.productosDBConnection = productosDBConnection;
         this.attributesDBConnection = attributesDBConnection;
         this.categoriesDBConnection = categoriesDBConnection;
 		products = new ArrayList<>();
@@ -51,12 +57,18 @@ public class ProductModel implements IProductModel {
         }
     }
 
-    public int createProduct(String productName, int categoryID, boolean isModify) {
+    public int createProduct(String productName, Categorias categoria, boolean isModify) {
         try {
-            int productID = productsDBConnection.insertProduct(productName, categoryID);
+            Productos producto = new Productos();
+            producto.setNombre(productName);
+            producto.setCategoria(categoria);
+            productosDBConnection.saveProducto(producto);
+            int productID = productsDBConnection.getProductID(productName);
+
             if(!isModify){
                 notifyProductCreationSuccess();
             }
+
             return productID;
         } catch (Exception e) {
             notifyProductCreationFailure();

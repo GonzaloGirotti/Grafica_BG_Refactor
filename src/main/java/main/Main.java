@@ -22,10 +22,11 @@ import presenters.product.ProductSearchPresenter;
 import presenters.settings.SettingsPresenter;
 import presenters.workbudget.WorkBudgetCreatePresenter;
 import presenters.workbudget.WorkBudgetSearchPresenter;
-import testing.entities.Presupuestos;
 import utils.databases.*;
+import utils.databases.hibernate.CategoriasDBConnection;
 import utils.databases.hibernate.ClientesDBConnection;
 import utils.databases.hibernate.PresupuestosDBConnection;
+import utils.databases.hibernate.ProductosDBConnection;
 import views.budget.BudgetCreateView;
 import views.budget.BudgetSearchView;
 import views.budget.list.BudgetListView;
@@ -54,6 +55,9 @@ public class Main {
 
         PresupuestosDBConnection presupuestosDBConnection = new PresupuestosDBConnection();
         ClientesDBConnection  clientesDBConnection = new ClientesDBConnection();
+        ProductosDBConnection productosDBConnection = new ProductosDBConnection();
+        CategoriasDBConnection categoriasDBConnection = new CategoriasDBConnection();
+
         CategoriesDatabaseConnection categoriesDB = new CategoriesDatabaseConnection();
         categoriesDB.loadDatabase();
         ClientsDatabaseConnection clientsDB = new ClientsDatabaseConnection();
@@ -74,9 +78,9 @@ public class Main {
         budgetProductsDB.loadDatabase();
 
         IClientModel clientModel = new ClientModel(clientsDB, clientesDBConnection);
-        IProductModel productModel = new ProductModel(productsDB, attributesDB, categoriesDB);
-        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, clientsDB, clientesDBConnection);
-        ICategoryModel categoryModel = new CategoryModel(categoriesDB);
+        IProductModel productModel = new ProductModel(productsDB, productosDBConnection, attributesDB, categoriesDB);
+        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, productosDBConnection, clientsDB, clientesDBConnection);
+        ICategoryModel categoryModel = new CategoryModel(categoriesDB, categoriasDBConnection);
         IProductListModel productListModel = new ProductListModel(productsDB);
         IClientListModel clientListModel = new ClientListModel(clientesDBConnection);
         IBudgetListModel budgetListModel = new BudgetListModel(budgetsDB);

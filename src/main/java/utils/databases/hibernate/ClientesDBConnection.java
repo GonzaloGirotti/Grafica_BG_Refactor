@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClientesDBConnection {
+public class ClientesDBConnection implements ICriteriaQuery {
     private static final Logger logger = LoggerFactory.getLogger(ClientesDBConnection.class);
     private final EntityManager em;
     private final EntityManagerFactory emf;

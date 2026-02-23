@@ -6,12 +6,13 @@ import models.listeners.successful.ProductCreationSuccessListener;
 import models.listeners.successful.ProductSearchSuccessListener;
 import utils.Attribute;
 import utils.Product;
+import utils.databases.hibernate.entities.Categorias;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public interface IProductModel {
-    int createProduct(String productName, int categoryID, boolean isModify);
+    int createProduct(String productName, Categorias categoria, boolean isModify);
 
     void addProductCreationSuccessListener(ProductCreationSuccessListener listener);
     void addProductCreationFailureListener(ProductCreationFailureListener listener);

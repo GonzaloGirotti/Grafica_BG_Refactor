@@ -3,6 +3,7 @@ package models;
 import java.util.*;
 
 import utils.databases.hibernate.ClientesDBConnection;
+import utils.databases.hibernate.ProductosDBConnection;
 import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS;
 import models.listeners.failed.*;
@@ -34,6 +35,7 @@ public class BudgetModel implements IBudgetModel {
     private final ClientsDatabaseConnection clientsDBConnection;
     private final ClientesDBConnection clientesConnection;
     private final PresupuestosDBConnection presupuestosDBConnection;
+    private final ProductosDBConnection productosDBConnection;
 
     // BUDGETS
     private ArrayList<Budget> budgets;
@@ -44,6 +46,7 @@ public class BudgetModel implements IBudgetModel {
     public BudgetModel(BudgetsDatabaseConnection budgetsDBConnection,
                        PresupuestosDBConnection presupuestosDBConnection,
                        ProductsDatabaseConnection productsDBConnection,
+                       ProductosDBConnection productosDBConnection,
                        ClientsDatabaseConnection clientsDBConnection,
                        ClientesDBConnection clientesConnection)
     {
@@ -59,6 +62,7 @@ public class BudgetModel implements IBudgetModel {
         this.clientsDBConnection = clientsDBConnection;
         this.presupuestosDBConnection = presupuestosDBConnection;
         this.clientesConnection = clientesConnection;
+        this.productosDBConnection = productosDBConnection;
     }
 
 

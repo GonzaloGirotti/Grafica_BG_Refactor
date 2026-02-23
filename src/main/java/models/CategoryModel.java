@@ -1,22 +1,20 @@
 package models;
 
-import models.listeners.failed.CategoryCreationFailureListener;
-import models.listeners.failed.CategorySearchFailureListener;
-import models.listeners.successful.CategoryCreationSuccessListener;
-import models.listeners.successful.CategorySearchSuccessListener;
-import utils.databases.AttributesDatabaseConnection;
 import utils.databases.CategoriesDatabaseConnection;
+import utils.databases.hibernate.CategoriasDBConnection;
+import utils.databases.hibernate.entities.Categorias;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CategoryModel implements ICategoryModel {
 
     private final CategoriesDatabaseConnection categoriesDBConnection;
+    private final CategoriasDBConnection categoriasDBConnection;
 
-    public CategoryModel(CategoriesDatabaseConnection categoriesDBConnection) {
+    public CategoryModel(CategoriesDatabaseConnection categoriesDBConnection, CategoriasDBConnection categoriasDBConnection) {
+        this.categoriasDBConnection = categoriasDBConnection;
         this.categoriesDBConnection = categoriesDBConnection;
     }
 
@@ -36,6 +34,15 @@ public class CategoryModel implements ICategoryModel {
         } catch (SQLException e) {
             e.printStackTrace();
             return new ArrayList<>();
+        }
+    }
+
+    public Categorias getOneCategory(int categoryID) {
+        try {
+            return categoriasDBConnection.getOneCategory(categoryID);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
