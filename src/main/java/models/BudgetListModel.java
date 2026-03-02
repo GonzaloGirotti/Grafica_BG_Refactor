@@ -2,18 +2,20 @@ package models;
 
 import utils.Budget;
 import utils.databases.BudgetsDatabaseConnection;
+import utils.databases.hibernate.PresupuestosDBConnection;
+import utils.databases.hibernate.entities.Presupuestos;
+
 import java.util.ArrayList;
 
 public class BudgetListModel implements IBudgetListModel {
-    private final BudgetsDatabaseConnection budgetsDBConnection;
+    private final PresupuestosDBConnection presupuestosDBConnection;
 
-    public BudgetListModel(BudgetsDatabaseConnection budgetsDBConnection) {
-        this.budgetsDBConnection = budgetsDBConnection;
-        ArrayList<Budget> budgets = new ArrayList<>();
+    public BudgetListModel(PresupuestosDBConnection presupuestosDBConnection) {
+        this.presupuestosDBConnection = presupuestosDBConnection;
     }
 
     @Override
-    public ArrayList<Budget> getBudgetsFromDB() {
-        return budgetsDBConnection.getAllBudgets();
+    public ArrayList<Presupuestos> getBudgetsFromDB() {
+        return presupuestosDBConnection.getAllPresupuestos("");
     }
 }

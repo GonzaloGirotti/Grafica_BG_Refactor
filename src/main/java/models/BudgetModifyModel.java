@@ -1,15 +1,20 @@
 package models;
 import utils.databases.BudgetsDatabaseConnection;
+import utils.databases.hibernate.PresupuestosDBConnection;
+import utils.databases.hibernate.entities.Presupuestos;
+
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class BudgetModifyModel implements IBudgetModifyModel {
     private final BudgetsDatabaseConnection budgetsDBConnection;
+    private final PresupuestosDBConnection presupuestosDBConnection;
     private static Logger LOGGER;
 
 
-    public BudgetModifyModel(BudgetsDatabaseConnection budgetsDBConnection) {
+    public BudgetModifyModel(BudgetsDatabaseConnection budgetsDBConnection, PresupuestosDBConnection presupuestosDBConnection) {
         this.budgetsDBConnection = budgetsDBConnection;
+        this.presupuestosDBConnection = presupuestosDBConnection;
     }
 
     public ArrayList<Double> getProductPrices(int budgetNumber, String budgetName) {
@@ -61,7 +66,7 @@ public class BudgetModifyModel implements IBudgetModifyModel {
 
     public ArrayList<String> getSelectedBudgetData(int budgetNumber) {
         try {
-            return budgetsDBConnection.getSelectedBudgetData(budgetNumber);
+            return presupuestosDBConnection.getBudgetData(budgetNumber);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting selected budget data");
         }

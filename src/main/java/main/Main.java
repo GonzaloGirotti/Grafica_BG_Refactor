@@ -79,14 +79,14 @@ public class Main {
 
         IClientModel clientModel = new ClientModel(clientsDB, clientesDBConnection);
         IProductModel productModel = new ProductModel(productsDB, productosDBConnection, attributesDB, categoriesDB);
-        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, productosDBConnection, clientsDB, clientesDBConnection);
+        IBudgetModel budgetModel = new BudgetModel(budgetsDB, presupuestosDBConnection, productsDB, productosDBConnection, clientesDBConnection);
         ICategoryModel categoryModel = new CategoryModel(categoriesDB, categoriasDBConnection);
         IProductListModel productListModel = new ProductListModel(productsDB);
         IClientListModel clientListModel = new ClientListModel(clientesDBConnection);
-        IBudgetListModel budgetListModel = new BudgetListModel(budgetsDB);
-        IBudgetModifyModel budgetModifyModel = new BudgetModifyModel(budgetsDB);
+        IBudgetListModel budgetListModel = new BudgetListModel(presupuestosDBConnection);
+        IBudgetModifyModel budgetModifyModel = new BudgetModifyModel(budgetsDB, presupuestosDBConnection);
         ISettingsModel settingsModel = new SettingsModel(settingsDB);
-        IBudgetHistoryModel budgetHistoryModel = new BudgetHistoryModel(budgetsDB, clientsDB);
+        IBudgetHistoryModel budgetHistoryModel = new BudgetHistoryModel(budgetsDB, presupuestosDBConnection);
         WorkBudgetModel workBudgetModel = new WorkBudgetModel(clientsDB, workBudgetsDB, clientesDBConnection);
 
 

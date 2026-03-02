@@ -32,13 +32,12 @@ public class BudgetModel implements IBudgetModel {
     // DATABASE CONNECTIONS
     private final BudgetsDatabaseConnection budgetsDBConnection;
     private final ProductsDatabaseConnection productsDBConnection;
-    private final ClientsDatabaseConnection clientsDBConnection;
     private final ClientesDBConnection clientesConnection;
     private final PresupuestosDBConnection presupuestosDBConnection;
     private final ProductosDBConnection productosDBConnection;
 
     // BUDGETS
-    private ArrayList<Budget> budgets;
+    private ArrayList<Presupuestos> budgets;
 
 
 
@@ -47,7 +46,6 @@ public class BudgetModel implements IBudgetModel {
                        PresupuestosDBConnection presupuestosDBConnection,
                        ProductsDatabaseConnection productsDBConnection,
                        ProductosDBConnection productosDBConnection,
-                       ClientsDatabaseConnection clientsDBConnection,
                        ClientesDBConnection clientesConnection)
     {
         // INITIALIZE LISTENERS
@@ -59,7 +57,6 @@ public class BudgetModel implements IBudgetModel {
         // INITIALIZE DATABASE CONNECTIONS
         this.budgetsDBConnection = budgetsDBConnection;
         this.productsDBConnection = productsDBConnection;
-        this.clientsDBConnection = clientsDBConnection;
         this.presupuestosDBConnection = presupuestosDBConnection;
         this.clientesConnection = clientesConnection;
         this.productosDBConnection = productosDBConnection;
@@ -197,7 +194,7 @@ public class BudgetModel implements IBudgetModel {
 
     public double getBudgetTotalPrice(int budgetID) {
         try {
-            return budgetsDBConnection.getBudgetTotalPrice(budgetID);
+            return presupuestosDBConnection.getBudgetTotalPrice(budgetID);
         } catch (Exception e) {
             logger.error("Error getting budget total price: {}", e.getMessage(), e);
         }
@@ -208,7 +205,7 @@ public class BudgetModel implements IBudgetModel {
     //GET NEXT BUDGET NUMBER:
     public int getNextBudgetNumber() {
         try {
-            return budgetsDBConnection.getNextBudgetNumber();
+            return presupuestosDBConnection.getNextBudgetNumber();
         } catch (Exception e) {
             logger.error("Error getting next budget number: {}", e.getMessage(), e);
         }
@@ -255,7 +252,7 @@ public class BudgetModel implements IBudgetModel {
     @Override
     public int getBudgetID(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getBudgetID(budgetName, budgetNumber);
+            return presupuestosDBConnection.getBudgetID(budgetNumber, budgetName);
         } catch (Exception e) {
             logger.error("Error getting budget ID: {}", e.getMessage(), e);
         }
@@ -277,14 +274,14 @@ public class BudgetModel implements IBudgetModel {
 
     // GET LAST BUDGETS QUERY
     @Override
-    public ArrayList<Budget> getLastBudgetsQuery() {
+    public ArrayList<Presupuestos> getLastBudgetsQuery() {
         return budgets;
     }
 
     @Override
     public void queryBudgets(String budgetSearch) {
         try {
-            budgets = budgetsDBConnection.getBudgets(budgetSearch);
+            budgets = presupuestosDBConnection.getAllPresupuestos(budgetSearch);
             notifyBudgetSearchSuccess();
         } catch (Exception e) {
             logger.error("Error querying budgets: {}", e.getMessage(), e);

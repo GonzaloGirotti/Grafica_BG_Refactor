@@ -26,7 +26,7 @@ public interface IBudgetModel {
     void saveProducts(Presupuestos presupuestos, List<Integer> productAmounts, List<String> productNames, List<String> observations, List<String> productMeasures, List<Double> productPrices);
     int getBudgetID(int budgetNumber, String budgetName);
     ArrayList<String> getCitiesName();
-    ArrayList<Budget> getLastBudgetsQuery();
+    ArrayList<Presupuestos> getLastBudgetsQuery();
     void queryBudgets(String budgetSearch);
     void deleteOneBudget(Presupuestos presupuesto);
     Presupuestos findPresupuestoByID(int presupuestoID);

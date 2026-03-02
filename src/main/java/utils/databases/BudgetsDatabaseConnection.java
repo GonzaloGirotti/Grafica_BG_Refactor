@@ -76,30 +76,6 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         return budgets;
     }
 
-    public ArrayList<Budget> getAllBudgets() {
-        String sql = "SELECT * FROM Presupuestos";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery(sql)) {
-
-            ArrayList<Budget> budgets = new ArrayList<>();
-            while (resultSet.next()) {
-                Budget budget = new Budget(
-                        resultSet.getString("Nombre_Cliente"),
-                        resultSet.getString("Fecha"),
-                        resultSet.getString("Tipo_Cliente"),
-                        resultSet.getInt("Numero_Presupuesto")
-                );
-                budgets.add(budget);
-            }
-            return budgets;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return new ArrayList<>();
-    }
-
     public int getBudgetID(String budgetName, int budgetNumber) throws SQLException {
         String sql = "SELECT ID FROM Presupuestos WHERE Nombre_Cliente = ? AND Numero_presupuesto = ?";
         Connection conn = connect();
@@ -198,26 +174,6 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         return prices;
     }
 
-    public ArrayList<String> getSelectedBudgetData(int budgetNumber) {
-        String sql = "SELECT * FROM Presupuestos WHERE Numero_presupuesto = ?";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, budgetNumber);
-            ResultSet resultSet = pstmt.executeQuery();
-            ArrayList<String> selectedBudgetData = new ArrayList<>();
-            while (resultSet.next()) {
-                selectedBudgetData.add(String.valueOf(resultSet.getInt("ID")));
-                selectedBudgetData.add(resultSet.getString("Nombre_Cliente"));
-                selectedBudgetData.add(resultSet.getString("Fecha"));
-                selectedBudgetData.add(resultSet.getString("Tipo_Cliente"));
-            }
-            return selectedBudgetData;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return new ArrayList<>();
-    }
-
     public String getOldClientName(int budgetNumber) {
         String sql = "SELECT Nombre_Cliente FROM Presupuestos WHERE Numero_presupuesto = ?";
         try (Connection conn = connect();
@@ -231,68 +187,4 @@ public class BudgetsDatabaseConnection extends DatabaseConnection{
         return "";
     }
 
-
-
-
-    public int getNextBudgetNumber() {
-        int bnumber = 1;  // Por defecto será 1 si no hay presupuestos en la tabla.
-        String sql = "SELECT MAX(Numero_presupuesto) FROM Presupuestos";
-
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet resultSet = stmt.executeQuery(sql)) {
-            if (resultSet.next()) {
-                bnumber = resultSet.getInt(1) + 1;  // Accediendo a la columna por índice.
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return bnumber;
-    }
-
-    public ArrayList<Budget> getBudgetsByClientId(int clientId) throws SQLException {
-        String sql = "SELECT * FROM Presupuestos WHERE Nombre_Cliente = (SELECT Nombre FROM Clientes WHERE ID = ?)";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, clientId);
-        ResultSet resultSet = pstmt.executeQuery();
-        ArrayList<Budget> budgets = new ArrayList<>();
-
-        while (resultSet.next()) {
-            Budget budget = new Budget(
-                    resultSet.getString("Nombre_Cliente"),
-                    resultSet.getString("Fecha"),
-                    resultSet.getString("Tipo_Cliente"),
-                    resultSet.getInt("Numero_Presupuesto")
-            );
-            budgets.add(budget);
-        }
-
-        pstmt.close();
-        conn.close();
-        return budgets;
-    }
-
-    public Budget getOneBudget(int budgetId) throws SQLException {
-        String sql = "SELECT * FROM Presupuestos WHERE ID = ?";
-        Connection conn = connect();
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, budgetId);
-        ResultSet resultSet = pstmt.executeQuery();
-
-        Budget budget = null;
-        if (resultSet.next()) {
-            budget = new Budget(
-                    resultSet.getString("Nombre_Cliente"),
-                    resultSet.getString("Fecha"),
-                    resultSet.getString("Tipo_Cliente"),
-                    resultSet.getInt("Numero_Presupuesto")
-            );
-        }
-
-        pstmt.close();
-        conn.close();
-        return budget;
-    }
 }

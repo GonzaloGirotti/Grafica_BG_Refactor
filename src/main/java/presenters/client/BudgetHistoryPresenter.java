@@ -5,6 +5,7 @@ import presenters.StandardPresenter;
 import utils.Budget;
 import utils.MessageTypes;
 import utils.PDFOpener;
+import utils.databases.hibernate.entities.Presupuestos;
 import views.client.IClientSearchView;
 import views.client.BudgetHistory.IBudgetHistoryView;
 
@@ -33,7 +34,7 @@ public class BudgetHistoryPresenter extends StandardPresenter {
     }
 
     public boolean setBudgetHistoryTable() {
-        ArrayList<Budget> budgets = getClientBudgets();
+        ArrayList<Presupuestos> budgets = getClientBudgets();
         boolean thereAreBudgets = !budgets.isEmpty();
         int rowCount = 0;
         double budgetTotal = 0.0;
@@ -41,14 +42,14 @@ public class BudgetHistoryPresenter extends StandardPresenter {
         budgetHistoryView.clearView();
 
         if(thereAreBudgets){
-            budgetHistoryView.setClientName(budgets.get(0).getName());
-            for (Budget budget : budgets) {
-                budgetTotal = getBudgetTotal(Integer.parseInt(budget.getBudgetNumber()), budget.getName());
+            budgetHistoryView.setClientName(budgets.get(0).getNombre_Cliente());
+            for (Presupuestos budget : budgets) {
+                budgetTotal = getBudgetTotal(budget.getNumero_Presupuesto(), budget.getNombre_Cliente());
 
 
-                budgetHistoryView.setTableValueAt(rowCount, 0, String.valueOf(budget.getName()));
-                budgetHistoryView.setTableValueAt(rowCount, 1, budget.getBudgetNumber());
-                budgetHistoryView.setTableValueAt(rowCount, 2, budget.getDate());
+                budgetHistoryView.setTableValueAt(rowCount, 0, String.valueOf(budget.getNombre_Cliente()));
+                budgetHistoryView.setTableValueAt(rowCount, 1, String.valueOf(budget.getNumero_Presupuesto()));
+                budgetHistoryView.setTableValueAt(rowCount, 2, budget.getFecha());
                 budgetHistoryView.setTableValueAt(rowCount, 3, String.valueOf(budgetTotal));
                 rowCount++;
             }
@@ -73,15 +74,15 @@ public class BudgetHistoryPresenter extends StandardPresenter {
         int budgetNumber = Integer.parseInt((String) budgetHistoryView.getBudgetHistoryTable().getValueAt(selectedBudgetRow, 1));
         String clientName = (String) budgetHistoryView.getBudgetHistoryTable().getValueAt(selectedBudgetRow, 0);
         int budgetId = budgetHistoryModel.getBudgetID(clientName, budgetNumber);
-        Budget budget = budgetHistoryModel.getOneBudget(budgetId);
-        String budgetDate = budget.getDate();
+        Presupuestos budget = budgetHistoryModel.getOneBudget(budgetId);
+        String budgetDate = budget.getFecha();
         String folderDir = "/PresupuestosPDF/";
 
 
         pdfOpener.openPDF(true, false, folderDir, budgetNumber, clientName, budgetDate);
     }
 
-    public ArrayList<Budget> getClientBudgets() {
+    public ArrayList<Presupuestos> getClientBudgets() {
         int selectedClientID = clientSearchView.getSelectedClientID();
         return budgetHistoryModel.getClientBudgets(selectedClientID);
     }

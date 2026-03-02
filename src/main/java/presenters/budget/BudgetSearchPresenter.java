@@ -43,13 +43,13 @@ public class BudgetSearchPresenter extends StandardPresenter {
     @Override
     protected void initListeners() {
         budgetModel.addBudgetSearchSuccessListener(() -> {
-            ArrayList<Budget> budgets = budgetModel.getLastBudgetsQuery();
+            ArrayList<Presupuestos> budgets = budgetModel.getLastBudgetsQuery();
             int rowCount = 0;
-            for (Budget budget : budgets) {
-                budgetSearchView.setStringTableValueAt(rowCount, 0, budget.getName());
-                budgetSearchView.setStringTableValueAt(rowCount, 1, budget.getDate());
-                budgetSearchView.setStringTableValueAt(rowCount, 2, budget.getClientType());
-                budgetSearchView.setStringTableValueAt(rowCount, 3, budget.getBudgetNumber());
+            for (Presupuestos budget : budgets) {
+                budgetSearchView.setStringTableValueAt(rowCount, 0, budget.getNombre_Cliente());
+                budgetSearchView.setStringTableValueAt(rowCount, 1, budget.getFecha());
+                budgetSearchView.setStringTableValueAt(rowCount, 2, budget.getTipo_Cliente());
+                budgetSearchView.setStringTableValueAt(rowCount, 3, String.valueOf(budget.getNumero_Presupuesto()));
                 rowCount++;
             }
         });

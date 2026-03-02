@@ -78,7 +78,9 @@ public class ClientesDBConnection implements ICriteriaQuery {
         CriteriaQuery<Clientes> cq = cb.createQuery(Clientes.class); // Crea una CriteriaQuery para la entidad Clientes
         Root<Clientes> cliente = cq.from(Clientes.class); // Define la raíz de la consulta, que es la entidad Clientes
 
-        List<Predicate> predicates = new ArrayList<>(); // Lista para almacenar los predicados de búsqueda. Cada predicado representa una condición de búsqueda basada en los parámetros proporcionados.
+        // Lista para almacenar los predicados de búsqueda.
+        // Cada predicado representa una condición de búsqueda basada en los parámetros proporcionados.
+        List<Predicate> predicates = new ArrayList<>();
 
         // Búsqueda parcial por Nombre (CASE INSENSITIVE)
         if (nombre != null && !nombre.isEmpty()) {
