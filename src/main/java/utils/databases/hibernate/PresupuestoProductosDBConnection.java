@@ -11,7 +11,9 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.databases.hibernate.config.MyPersistenceUnitInfo;
+import utils.databases.hibernate.entities.Clientes;
 import utils.databases.hibernate.entities.PRESUPUESTO_PRODUCTOS;
+import utils.databases.hibernate.entities.Presupuestos;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,14 +38,17 @@ public class PresupuestoProductosDBConnection {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Object> criteriaQuery = cb.createQuery(Object.class);
         Root<PRESUPUESTO_PRODUCTOS> presupuestoProducto =  criteriaQuery.from(PRESUPUESTO_PRODUCTOS.class);
+        Root<Presupuestos> presupuesto = criteriaQuery.from(Presupuestos.class);
 
         List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(presupuestoProducto.get("presupuesto").get("ID"), presupuesto.get("ID")));
+        predicates.add(cb.equal(presupuesto.get("Numero_Presupuesto"), budgetNumber));
 
-        if(budgetNumber >= 0 && clientName != null) {
-            predicates.add(cb.equal(presupuestoProducto.get(columnName), budgetNumber));
-        }
+        criteriaQuery.select(presupuestoProducto.get(columnName)).where(predicates.toArray(new Predicate[0]));
 
-        return new ArrayList<>(em.createQuery(criteriaQuery.where(predicates.toArray(new Predicate[0]))).getResultList());
+        List<Object> results = em.createQuery(criteriaQuery).getResultList();
+        logger.info("Consulta para columna '{}' con presupuesto {} y cliente '{}' retornó {} resultados.", columnName, budgetNumber, clientName, results.size());
+        return new ArrayList<>(results);
     }
 
     public ArrayList<Double> getProductPrices(int budgetNumber, String clientName) {

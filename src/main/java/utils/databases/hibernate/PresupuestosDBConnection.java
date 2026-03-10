@@ -76,7 +76,14 @@ public class PresupuestosDBConnection {
     }
 
     public String getBudgetClientName(int budgetNumber){
-        String clientName = em.find(Presupuestos.class, budgetNumber).getNombre_Cliente();
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<String> cq = cb.createQuery(String.class);
+        Root<Presupuestos> root = cq.from(Presupuestos.class);
+
+        cq.select(root.get("Nombre_Cliente")).where(cb.equal(root.get("Numero_Presupuesto"), budgetNumber));
+
+        List<String> result = em.createQuery(cq).getResultList();
+        String clientName = result.isEmpty() ? null : result.get(0);
         if(clientName != null) {
             logger.info("Client name found for budget number {}: {}", budgetNumber, clientName);
         } else {
