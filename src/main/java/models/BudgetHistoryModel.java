@@ -50,8 +50,8 @@ public class BudgetHistoryModel implements IBudgetHistoryModel {
 
     public double getBudgetTotal(int budgetNumber, String clientName) {
         try {
-            int budgetId = this.budgetsDatabaseConnection.getBudgetID(clientName, budgetNumber);
-            return this.budgetsDatabaseConnection.getBudgetTotalPrice(budgetId);
+            int budgetId = this.presupuestosDBConnection.getBudgetID(budgetNumber, clientName);
+            return this.presupuestosDBConnection.getBudgetTotalPrice(budgetId);
         } catch (Exception e) {
             e.printStackTrace();
             return 0.0;

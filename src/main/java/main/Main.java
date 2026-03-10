@@ -23,10 +23,7 @@ import presenters.settings.SettingsPresenter;
 import presenters.workbudget.WorkBudgetCreatePresenter;
 import presenters.workbudget.WorkBudgetSearchPresenter;
 import utils.databases.*;
-import utils.databases.hibernate.CategoriasDBConnection;
-import utils.databases.hibernate.ClientesDBConnection;
-import utils.databases.hibernate.PresupuestosDBConnection;
-import utils.databases.hibernate.ProductosDBConnection;
+import utils.databases.hibernate.*;
 import views.budget.BudgetCreateView;
 import views.budget.BudgetSearchView;
 import views.budget.list.BudgetListView;
@@ -57,6 +54,7 @@ public class Main {
         ClientesDBConnection  clientesDBConnection = new ClientesDBConnection();
         ProductosDBConnection productosDBConnection = new ProductosDBConnection();
         CategoriasDBConnection categoriasDBConnection = new CategoriasDBConnection();
+        PresupuestoProductosDBConnection presupuestoProductosDBConnection = new PresupuestoProductosDBConnection();
 
         CategoriesDatabaseConnection categoriesDB = new CategoriesDatabaseConnection();
         categoriesDB.loadDatabase();
@@ -84,7 +82,7 @@ public class Main {
         IProductListModel productListModel = new ProductListModel(productsDB);
         IClientListModel clientListModel = new ClientListModel(clientesDBConnection);
         IBudgetListModel budgetListModel = new BudgetListModel(presupuestosDBConnection);
-        IBudgetModifyModel budgetModifyModel = new BudgetModifyModel(budgetsDB, presupuestosDBConnection);
+        IBudgetModifyModel budgetModifyModel = new BudgetModifyModel(presupuestoProductosDBConnection, presupuestosDBConnection);
         ISettingsModel settingsModel = new SettingsModel(settingsDB);
         IBudgetHistoryModel budgetHistoryModel = new BudgetHistoryModel(budgetsDB, presupuestosDBConnection);
         WorkBudgetModel workBudgetModel = new WorkBudgetModel(clientsDB, workBudgetsDB, clientesDBConnection);
@@ -107,7 +105,7 @@ public class Main {
         ProductCreatePresenter productCreatePresenter = new ProductCreatePresenter(productCreateView, productModel, categoryModel, settingsModel);
         ProductListPresenter productListPresenter = new ProductListPresenter(productListView, productListModel);
         CategoryCreatePresenter categoryCreatePresenter = new CategoryCreatePresenter(categoryCreateView);
-        BudgetListPresenter budgetListPresenter = new BudgetListPresenter(budgetListView, budgetListModel);
+        BudgetListPresenter budgetListPresenter = new BudgetListPresenter(presupuestosDBConnection, budgetListView, budgetListModel);
         ProductSearchView productSearchView = new ProductSearchView(productListPresenter);
         ProductSearchPresenter productSearchPresenter = new ProductSearchPresenter(settingsModel, productSearchView, productModel, categoryModel);
         ClientSearchView clientSearchView = new ClientSearchView(clientListPresenter);

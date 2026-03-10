@@ -1,5 +1,6 @@
 package models;
 import utils.databases.BudgetsDatabaseConnection;
+import utils.databases.hibernate.PresupuestoProductosDBConnection;
 import utils.databases.hibernate.PresupuestosDBConnection;
 import utils.databases.hibernate.entities.Presupuestos;
 
@@ -7,19 +8,19 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class BudgetModifyModel implements IBudgetModifyModel {
-    private final BudgetsDatabaseConnection budgetsDBConnection;
+    private final PresupuestoProductosDBConnection presupuestoProductosDBConnection;
     private final PresupuestosDBConnection presupuestosDBConnection;
     private static Logger LOGGER;
 
 
-    public BudgetModifyModel(BudgetsDatabaseConnection budgetsDBConnection, PresupuestosDBConnection presupuestosDBConnection) {
-        this.budgetsDBConnection = budgetsDBConnection;
+    public BudgetModifyModel(PresupuestoProductosDBConnection presupuestoProductosDBConnection, PresupuestosDBConnection presupuestosDBConnection) {
         this.presupuestosDBConnection = presupuestosDBConnection;
+        this.presupuestoProductosDBConnection = presupuestoProductosDBConnection;
     }
 
     public ArrayList<Double> getProductPrices(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getProductPrices(budgetName, budgetNumber);
+            return presupuestoProductosDBConnection.getProductPrices(budgetNumber, budgetName);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting product prices");
         }
@@ -29,7 +30,7 @@ public class BudgetModifyModel implements IBudgetModifyModel {
     @Override
     public ArrayList<String> getProductObservations(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getProductObservations(budgetName, budgetNumber);
+            return presupuestoProductosDBConnection.getProductObservations(budgetNumber, budgetName);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting product observations");
         }
@@ -39,7 +40,7 @@ public class BudgetModifyModel implements IBudgetModifyModel {
     @Override
     public ArrayList<String> getProductMeasures(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getProductMeasures(budgetName, budgetNumber);
+            return presupuestoProductosDBConnection.getProductMeasures(budgetNumber, budgetName);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting product measures");
         }
@@ -48,7 +49,7 @@ public class BudgetModifyModel implements IBudgetModifyModel {
 
     public ArrayList<String> getSavedProductNames(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getSavedProductNames(budgetName, budgetNumber);
+            return presupuestoProductosDBConnection.getSavedProductNames(budgetNumber, budgetName);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting product names");
         }
@@ -57,7 +58,7 @@ public class BudgetModifyModel implements IBudgetModifyModel {
 
     public ArrayList<Integer> getSavedProductAmounts(int budgetNumber, String budgetName) {
         try {
-            return budgetsDBConnection.getSavedProductAmounts(budgetName, budgetNumber);
+            return presupuestoProductosDBConnection.getSavedProductAmounts(budgetNumber, budgetName);
         } catch (Exception e) {
             LOGGER.log(null, "Error getting product amounts");
         }
@@ -75,6 +76,6 @@ public class BudgetModifyModel implements IBudgetModifyModel {
 
     @Override
     public String getOldClientName(int budgetNumber) {
-        return budgetsDBConnection.getOldClientName(budgetNumber);
+        return presupuestosDBConnection.getBudgetClientName(budgetNumber);
     }
 }
